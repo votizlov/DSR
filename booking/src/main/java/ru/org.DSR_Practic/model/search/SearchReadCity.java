@@ -14,6 +14,7 @@ import ru.org.DSR_Practic.model.exception.NoFoundBookException;
 import ru.org.DSR_Practic.model.exception.RobotException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -85,14 +86,12 @@ public class SearchReadCity implements Search {
             try {
                 book = initBook(books.getJSONObject(0));
                 for (int i = 1; i < books.length(); i++) {
-                    System.out.println(book.getCommentsJSON().toString() + "   !!!!!pref!!!\n\n");
                     JSONObject JSONBook = books.getJSONObject(i);
 
                     List<String> comments;
                     if ((comments = getComments(JSONBook)) != null) {
                         book.addCommentsJSON(comments);
                     }
-                    System.out.println(book.getCommentsJSON().toString());
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

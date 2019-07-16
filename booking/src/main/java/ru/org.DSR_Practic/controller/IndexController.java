@@ -9,10 +9,7 @@ import ru.org.DSR_Practic.domain.BookID;
 public class IndexController {
 
     @GetMapping("/")
-    public ModelAndView toSearch(ModelAndView model) {
-        model.clear();
-        model.setViewName("search");
-        model.addObject("bookID", new BookID());
-        return model;
+    public String redirect() {
+        return "redirect:search";
     }
 }

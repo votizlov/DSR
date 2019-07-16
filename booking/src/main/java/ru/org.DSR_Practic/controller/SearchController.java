@@ -29,7 +29,6 @@ public class SearchController {
             try {
                 Book book = search.get(bookID);
                 model.addAttribute("book", book);
-                System.out.println(book.getCommentsJSON().toString());
             } catch (NoFoundBookException e) {
                 model.addAttribute("bookID", new BookID());
                 model.addAttribute("message", "Книга не найдена - " + e.getRequestBook());
