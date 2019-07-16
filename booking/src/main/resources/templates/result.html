@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>DSR Practice task</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="..\static\css\result.css" th:href="@{/css/result.css}" rel="stylesheet"/>
+    <script th:src="@{/js/result.js}" src="../static/js/result.js"></script>
+</head>
+<body>
+<div id="title">
+    <div id="description">
+        <p>
+            <td th:text="'Название книги - '+${book.bookID.name}"; /> <br>
+            <td th:text="'Имя Автора - '+${book.bookID.author}"; /> <br>
+            <td th:text="'Книга издана - '+${book.year}"; /> <br>
+        </p>
+    </div>
+    <div id="controller">
+        <form id="back" action="#" th:action="@{/result}" method="post">
+            <input type="submit" value="Back"/>
+        </form>
+    </div>
+</div>
+<div id="content">
+    <div id="comments">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            var comments = /*[[${book.commentsJSON}]]*/ null;
+            pushComments(comments);
+            /*]]>*/
+        </script>
+    </div>
+</div>
+</body>
+</html>

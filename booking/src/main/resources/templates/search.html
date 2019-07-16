@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>DSR Practice task</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="..\static\css\search.css" th:href="@{/css/search.css}" rel="stylesheet"/>
+</head>
+
+<body>
+<div id="title">
+    <div id="logo">
+        <p>
+            Поисковик отзывов!
+        </p>
+        <p>
+            Этот сервис позволяет узнать об определенной книге <br>
+            сразу с нескольких ресурсов в три клика! <br>
+            (p. s. пока что одного...)
+        </p>
+    </div>
+</div>
+<div id="background">
+    <div id="main">
+        <div id="description">
+            <p>
+            <td th:text="${message}"/>
+            <br>
+            Введит имя автора и название книги, <br>
+            затем нажмите поиск
+            </p>
+        </div>
+        <div id="controller">
+            <form action="#" th:action="@{/search}" th:object="${bookID}" method="post">
+                <!-- на самом деле без разницу, в любом случае bookID
+                будет пересоздано с параметрами, полученными из запроса
+                к сайту -->
+                <input type='text' th:field="*{name}" placeholder="Name book"/> <br><br>
+                <input type='text' th:field="*{author}" placeholder="Name Author"/> <br><br>
+                <input type="submit" value="Поиск"/>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

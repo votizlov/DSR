@@ -1,0 +1,55 @@
+body {
+    max-width: 1536px;
+    max-height: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#title {
+    overflow:hidden;
+    width: 100%;
+    background: url("../img/search/bckg_title.jpg");
+    text-align: center;
+    font: 20pt sans-serif; 
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+#logo {
+    border: 5px solid #bfa68e;
+    width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    background: #d6c3a5;
+}
+#background {
+    overflow:hidden;
+    width: 100%;
+    height: 600px;
+    background: url("../img/search/bckg.jpg");
+}
+#main {
+    margin-top: 135px;
+    width: 450px;
+    height: 330px;
+    margin-left: auto;
+    margin-right: auto;
+    background: url("../img/search/bckg_main.jpg");
+    border: 5px solid #927e6b;
+    text-align: center;
+    font: 16pt sans-serif; 
+    padding-left: auto;
+    padding-right: auto;
+}
+
+#input {
+    font: 1em sans-serif;
+}
+
+input[type=text] {
+    width: 250px;  height: 30px; font: 1em sans-serif;
+}
+
+input[type=submit] {
+    width: 150px;  height: 40px; font: 1em sans-serif;
+}
+

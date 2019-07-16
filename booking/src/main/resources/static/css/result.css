@@ -1,0 +1,53 @@
+#title {
+    overflow:hidden;
+    width: 100%;
+    font: 20pt sans-serif;
+    border: #868686 ridge 6px;
+    height: 170px;
+    background: url("../img/search/bckg.jpg");
+}
+#controller {
+    margin-top: 65px;
+    margin-right: 80px;
+    float: right;
+}
+#controller input[type=submit] {
+    background-color: #d6c3a5;
+    border-bottom-color: #bfa68e;
+}
+
+#description {
+    margin-top: 10px;
+    margin-left: 60px;
+    float: left;
+    height: 150px;
+    width: 800px;
+    border: #bfa68e ridge 3px;
+    background: #d6c3a5;
+}
+
+#back {
+    margin-right: auto;
+    margin-left: auto;
+}
+#back input[type=submit] {
+    width: 150px;  height: 40px; font: 1em sans-serif;
+}
+
+#comments {
+    overflow:hidden;
+    background: #b9b9b9;
+    width: 100%;
+    min-height: 700px;
+    height: 100%;
+    border-bottom:#868686 6px ridge;
+    border-left:#868686 6px ridge;
+    border-right:#868686 6px ridge;
+    background: url("../img/search/bckg_main.jpg");
+}
+
+#comment {
+    font: 1.5em sans-serif;
+    padding-left: 30px;
+    width: 1100px;
+}
