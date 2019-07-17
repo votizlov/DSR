@@ -1,6 +1,6 @@
-package ru.org.DSR_Practic.model.exception;
+package ru.org.dsr.exception;
 
-import ru.org.DSR_Practic.domain.BookID;
+import ru.org.dsr.domain.BookID;
 
 public class NoFoundBookException extends Exception {
     private String requestBook;
@@ -9,8 +9,10 @@ public class NoFoundBookException extends Exception {
         return requestBook;
     }
 
-    public NoFoundBookException(String msg, BookID bookID) {
-        super(msg);
+    public NoFoundBookException() {}
+
+    public NoFoundBookException(String message, BookID bookID) {
+        super(message);
         requestBook = String.format("Author: %s; Book: %s", bookID.getAuthor(), bookID.getName());
     }
 

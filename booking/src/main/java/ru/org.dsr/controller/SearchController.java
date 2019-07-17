@@ -1,14 +1,14 @@
-package ru.org.DSR_Practic.controller;
+package ru.org.dsr.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import ru.org.DSR_Practic.domain.Book;
-import ru.org.DSR_Practic.domain.BookID;
-import ru.org.DSR_Practic.model.exception.NoFoundBookException;
-import ru.org.DSR_Practic.model.exception.RobotException;
-import ru.org.DSR_Practic.model.search.Search;
-import ru.org.DSR_Practic.model.search.SearchReadCity;
+import ru.org.dsr.domain.Book;
+import ru.org.dsr.domain.BookID;
+import ru.org.dsr.exception.NoFoundBookException;
+import ru.org.dsr.exception.RobotException;
+import ru.org.dsr.search.Search;
+import ru.org.dsr.search.SearchReadCityJSOUP;
 
 @Controller
 public class SearchController {
@@ -25,9 +25,11 @@ public class SearchController {
                 (bookID.getAuthor() == null || bookID.getAuthor().equals("")) &&
                         (bookID.getName() == null || bookID.getName().equals("")) )
         ){
-            Search search = new SearchReadCity();
+            Search search;
             try {
-                Book book = search.get(bookID);
+                search = new SearchReadCityJSOUP(bookID);
+                Book book = search.getBook();
+                book.addCommentsJSON(search.loadJsonComments(2));
                 model.addAttribute("book", book);
             } catch (NoFoundBookException e) {
                 model.addAttribute("bookID", new BookID());

@@ -1,4 +1,4 @@
-package ru.org.DSR_Practic.domain;
+package ru.org.dsr.domain;
 
 public class BookID {
     private String author;

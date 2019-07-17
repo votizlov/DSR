@@ -1,12 +1,8 @@
-package ru.org.DSR_Practic.controller;
+package ru.org.dsr.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.ModelAndView;
-import ru.org.DSR_Practic.domain.BookID;
 
 @Controller
 public class ResultController {
