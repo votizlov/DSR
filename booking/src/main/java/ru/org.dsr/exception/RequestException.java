@@ -1,5 +1,7 @@
 package ru.org.dsr.exception;
 
+import java.util.Arrays;
+
 public class RequestException extends Exception {
     private String url;
     private String method;
@@ -35,5 +37,18 @@ public class RequestException extends Exception {
 
     public String[] getParams() {
         return params;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    @Override
+    public String toString() {
+        return "RequestException{" +
+                "url='" + url + '\'' +
+                ", method='" + method + '\'' +
+                ", params=" + Arrays.toString(params) +
+                '}';
     }
 }

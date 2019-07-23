@@ -23,4 +23,12 @@ public class JSONImproperHandling extends Exception {
     public String getDescription() {
         return description;
     }
+
+    @Override
+    public String toString() {
+        return "JSONImproperHandling{" +
+                "JSONResponse='" + JSONResponse + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

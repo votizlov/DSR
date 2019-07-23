@@ -1,36 +1,42 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html ng-app="resultApp" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <title>DSR Practice task</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link href="..\static\css\result.css" th:href="@{/css/result.css}" rel="stylesheet"/>
-    <script th:src="@{/js/result.js}" src="../static/js/result.js"></script>
+    <link   th:href="@{/css/result.css}" rel="stylesheet"/>
+    <script th:src="@{/js/lib/angular.js}" ></script>
+    <script th:src="@{/js/lib/jquery-3.4.1.js}"></script>
+    <script th:src="@{/js/controller/result.js}"></script>
 </head>
 <body>
-<div id="title">
-    <div id="description">
+<div id="title" ng-controller="stageBook">
+    <div id="description" ng-init="initBook()">
         <p>
-            <td th:text="'Название книги - '+${book.bookID.name}"; /> <br>
-            <td th:text="'Имя Автора - '+${book.bookID.author}"; /> <br>
-            <td th:text="'Книга издана - '+${book.year}"; /> <br>
+            Название книги : {{name}} <br>
+            Имя автора : {{author}} <br>
+
         </p>
     </div>
     <div id="controller">
-        <form id="back" action="#" th:action="@{/result}" method="post">
+        <form id="back" action="#" th:action="@{/resultExit}" method="post">
             <input type="submit" value="Back"/>
         </form>
     </div>
 </div>
-<div id="content">
+<div id="content" ng-controller="comments">
     <div id="comments">
-        <script th:inline="javascript">
-            /*<![CDATA[*/
-            var comments = /*[[${book.commentsJSON}]]*/ null;
-            pushComments(comments);
-            /*]]>*/
-        </script>
+        <div id="comment">
+            <p>
+
+            </p>
+            <br>
+            <br>
+            <hr color='#bfa68e'/><br>
+        </div>
+
     </div>
+    <button ng-click="pushComments(5)">Еще</button>
 </div>
 </body>
 </html>

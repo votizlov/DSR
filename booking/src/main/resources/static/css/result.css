@@ -51,3 +51,9 @@
     padding-left: 30px;
     width: 1100px;
 }
+
+button {
+    background-color: #d6c3a5;
+    border-bottom-color: #bfa68e;
+    width: 150px;  height: 40px; font: 1em sans-serif;
+}

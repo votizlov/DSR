@@ -11,12 +11,15 @@ import org.jsoup.select.Elements;
 import ru.org.dsr.domain.Book;
 import ru.org.dsr.domain.BookID;
 import ru.org.dsr.exception.JSONImproperHandling;
-import ru.org.dsr.exception.NoFoundBookException;
+import ru.org.dsr.exception.NoFoundElementsException;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
+import ru.org.dsr.model.MainLog;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SearchReadCityJSOUP implements Search {
 
@@ -24,49 +27,60 @@ public class SearchReadCityJSOUP implements Search {
     private final String SEARCH = "https://www.chitai-gorod.ru/search.php";
     private final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; rv:40.0) Gecko/20100101 Firefox/40.0 Chrome/74.0.3729.169 Safari/537.36";
     private final int MAX_COUNT_BOOKS = 50;
-    private final int MIN_CAPACITY_COMMENT = 45;
+    private final JSONObject JSON_MAIN_BOOK;
 
-    private Queue<String> cache;
+    private Queue<String> tmpComments;
     private Queue<JSONObject> books;
-    private JSONObject JSONMainBook;
+    private Logger log;
 
-    public SearchReadCityJSOUP(BookID bookID) throws RobotException, NoFoundBookException {
-        cache = new LinkedList<>();
+    public SearchReadCityJSOUP(BookID bookID) throws RequestException, RobotException, JSONImproperHandling {
+        log = MainLog.getLog();
+
+        tmpComments = new LinkedList<>();
         books = new LinkedList<>();
-        String request = String.format("%s %s", bookID.getName(), bookID.getAuthor());
 
-        try {
-            JSONObject[] jsonArray = getJsonBooks(request);
-            books.addAll(Arrays.asList(jsonArray));
-            JSONMainBook = jsonArray[0];
-        } catch (JSONImproperHandling | RequestException e) {
-            //TODO log
-        }
+        String request = String.format("%s %s", bookID.getName(), bookID.getAuthor());
+        JSONObject[] jsonArray = getJsonBooks(request);
+
+        assert jsonArray != null;
+        books.addAll(Arrays.asList(jsonArray));
+
+        JSON_MAIN_BOOK = jsonArray[0];
     }
 
     @Override
-    public List<String> loadJsonComments(int count) {
+    public boolean isEmpty() {
+        return books.isEmpty() && tmpComments.isEmpty();
+    }
+
+    @Override
+    public List<String> loadJsonComments(int count) throws RobotException {
         LinkedList<String> comments = new LinkedList<>();
         Iterator<String> it;
-        if (cache.isEmpty()) {
-            if (books.isEmpty()) return null;
-            JSONObject JSONBook = books.poll();
-            List<String> loadedComments = getComments(JSONBook);
+        if (tmpComments.isEmpty()) {
+            List<String> loadedComments = null;
+            while (!books.isEmpty()) {
+                JSONObject urlBook = books.poll();
+                loadedComments = getComments(urlBook);
+                if (!loadedComments.isEmpty()) break;
+            }
+            assert loadedComments != null;
+            if (books.isEmpty() && loadedComments.isEmpty()) return null;
             it = loadedComments.iterator();
             for (int i = 0; i < count && it.hasNext(); i++) {
                 comments.add(it.next());
             }
             while (it.hasNext()) {
-                cache.add(it.next());
+                tmpComments.add(it.next());
             }
         } else {
-            if (cache.size() > count) {
+            if (tmpComments.size() > count) {
                 for (int i = 0; i < count; i++) {
-                    comments.add(cache.poll());
+                    comments.add(tmpComments.poll());
                 }
             } else {
-                while (!cache.isEmpty()) {
-                    comments.add(cache.poll());
+                while (!tmpComments.isEmpty()) {
+                    comments.add(tmpComments.poll());
                 }
                 JSONObject JSONBook = books.poll();
                 List<String> loadedComments = getComments(JSONBook);
@@ -75,7 +89,7 @@ public class SearchReadCityJSOUP implements Search {
                     comments.add(it.next());
                 }
                 while (it.hasNext()) {
-                    cache.add(it.next());
+                    tmpComments.add(it.next());
                 }
             }
         }
@@ -83,32 +97,48 @@ public class SearchReadCityJSOUP implements Search {
     }
 
     @Override
-    public Book getBook() {
-        return initBook(JSONMainBook);
+    public Book getBook() throws RobotException, RequestException {
+        return initBook(JSON_MAIN_BOOK);
     }
 
-    private Book initBook(JSONObject JSONBook) {
+    private Book initBook(JSONObject JSONBook) throws RobotException, RequestException {
         Book book = null;
+        String name, author, description;
         try {
-            String name = JSONBook.getJSONObject("_source")
-                    .getString("name");
-
-            //possible short last name
-            String author = JSONBook.getJSONObject("_source")
-                    .getString("author");
-
-            Integer year = JSONBook.getJSONObject("_source")
-                    .getInt("year");
-
-            book = new Book(new BookID(author, name), year);
-        } catch (JSONException e) {
-            //TODO log
+            Document pageBook = getDocBook(JSON_MAIN_BOOK);
+            Elements elsDescription = pageBook.select("div.product__description div");
+            if (elsDescription == null || elsDescription.size() == 0) {
+                throw new NoFoundElementsException(JSON_MAIN_BOOK.toString(), "div.product__description div");
+            }
+            description = elsDescription.get(0).text();
+        } catch (NoFoundElementsException | JSONImproperHandling e) {
+            log.log(Level.WARNING, e.toString(), e);
+            description = "Error: not found elements";
         }
+
+        try {
+            name = JSONBook.getJSONObject("_source")
+                    .getString("name");
+        } catch (JSONException e) {
+            log.log(Level.FINE, e.toString(), e);
+            name = "Error: not found elements";
+        }
+
+        //possible short last name
+        try {
+            author = JSONBook.getJSONObject("_source")
+                    .getString("author");
+        } catch (JSONException e) {
+            log.log(Level.FINE, e.toString(), e);
+            author = "Error: not found elements";
+        }
+
+        book = new Book(new BookID(author, name), description);
 
         return book;
     }
 
-    private JSONObject[] getJsonBooks(String request) throws NoFoundBookException, RobotException,
+    private JSONObject[] getJsonBooks(String request) throws RobotException,
             JSONImproperHandling, RequestException {
         String json = null;
         try {
@@ -131,12 +161,10 @@ public class SearchReadCityJSOUP implements Search {
                     .getJSONArray("hits");
 
             if (jsonArray == null || jsonArray.length() == 0) {
-                throw new NoFoundBookException();
+                return null;
             }
 
-            return toArray(new JSONObject(json)
-                    .getJSONObject("hits")
-                    .getJSONArray("hits"));
+            return toArray(jsonArray);
 
         } catch (NullPointerException | JSONException e) {
             throw new JSONImproperHandling(json,
@@ -146,14 +174,17 @@ public class SearchReadCityJSOUP implements Search {
         }
     }
 
-    private List<String> getComments (JSONObject JSONBook) {
+    private List<String> getComments (JSONObject JSONBook) throws RobotException {
         List<String> JSONComments = new LinkedList<>();
         Document docBook;
         try {
             docBook = getDocBook(JSONBook);
         }
-        catch (RequestException | JSONImproperHandling e) {
-            //TODO log
+        catch (RequestException e) {
+            log.log(Level.SEVERE, e.toString(), e);
+            return JSONComments;
+        } catch (JSONImproperHandling e) {
+            log.log(Level.WARNING, e.toString(), e);
             return JSONComments;
         }
         Elements elementsOfComments = docBook.select("div.card_review"); //block comments
@@ -168,18 +199,7 @@ public class SearchReadCityJSOUP implements Search {
         String desc = e.select("div.review__text.text").text().replace('\"', '\'');
         String date = e.select("div.review__date").text().replace('\"', '\'');
         String author = e.select("div.review__author").text().replace('\"', '\'');
-        StringBuilder JSONCommentBuilder = new StringBuilder(
-                title.length()+desc.length()+date.length()+author.length()+MIN_CAPACITY_COMMENT
-        );
-
-        JSONCommentBuilder.append('{');
-        JSONCommentBuilder.append(String.format("\"author\":\"%s\",", author));
-        JSONCommentBuilder.append(String.format("\"title\":\"%s\",", title));
-        JSONCommentBuilder.append(String.format("\"desc\":\"%s\",", desc));
-        JSONCommentBuilder.append(String.format("\"date\":\"%s\"", date));
-        JSONCommentBuilder.append('}');
-
-        return JSONCommentBuilder.toString();
+        return toJsonComments(author, title, desc, date, SITE);
     }
 
     private JSONObject[] toArray(JSONArray jsonArray) throws JSONException {
@@ -191,21 +211,18 @@ public class SearchReadCityJSOUP implements Search {
         return arr;
     }
 
-    private Document getDocBook(JSONObject JSONBook) throws RequestException, JSONImproperHandling {
+    private Document getDocBook(JSONObject JSONBook) throws RequestException, JSONImproperHandling, RobotException {
         String siteBook = null;
         try {
 
             String suffix = JSONBook.getJSONObject("_source").getString("main_url");
             siteBook = String.format("%s%s", SITE, suffix);
 
-            return Jsoup.connect(siteBook)
-                    .userAgent(USER_AGENT)
-                    .get();
+            return getDocument(siteBook);
 
         } catch (JSONException e) {
             throw new JSONImproperHandling(JSONBook.toString(), "unknown param: _source || main_url");
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RequestException(siteBook, "get");
         }
     }

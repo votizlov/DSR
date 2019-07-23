@@ -23,8 +23,6 @@
 <div id="background">
     <div id="main">
         <div id="description">
-            <p>
-            <td th:text="${message}"/>
             <br>
             Введит имя автора и название книги, <br>
             затем нажмите поиск
@@ -35,7 +33,7 @@
                 <!-- на самом деле без разницу, в любом случае bookID
                 будет пересоздано с параметрами, полученными из запроса
                 к сайту -->
-                <input type='text' th:field="*{name}" placeholder="Name book"/> <br><br>
+                <input type='text' required th:field="*{name}" placeholder="Name book"/> <br><br>
                 <input type='text' th:field="*{author}" placeholder="Name Author"/> <br><br>
                 <input type="submit" value="Поиск"/>
             </form>
