@@ -2,12 +2,20 @@ package ru.org.dsr.exception;
 
 public class RobotException extends Exception {
 
-    RobotException(String message) {
+    private String srcForRobot;
+
+    public RobotException() {}
+
+    public RobotException(String srcForRobot) {
+        this.srcForRobot = srcForRobot;
+    }
+
+    public RobotException(String message, String srcForRobot) {
         super(message);
+        this.srcForRobot = srcForRobot;
     }
 
-    public RobotException() {
-        super("You are robot");
+    public String getSrcForRobot() {
+        return srcForRobot;
     }
-
 }

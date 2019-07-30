@@ -1,54 +1,147 @@
 body {
-    max-width: 1536px;
-    max-height: 800px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0;
 }
 
-#title {
-    overflow:hidden;
-    width: 100%;
-    background: url("../img/search/bckg_title.jpg");
-    text-align: center;
-    font: 20pt sans-serif; 
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-#logo {
-    border: 5px solid #bfa68e;
-    width: 800px;
-    margin-left: auto;
+.centerW, .page, .title, .content, .main, #buttons  {
     margin-right: auto;
-    background: #d6c3a5;
+    margin-left: auto;
 }
-#background {
-    overflow:hidden;
-    width: 100%;
-    height: 600px;
-    background: url("../img/search/bckg.jpg");
+
+.centerH {
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
 }
-#main {
-    margin-top: 135px;
+
+.left, #logo {
+   float: left;
+}
+
+.right, #user_menu{
+    float: right;
+}
+
+.page {
+    min-width: auto;
+}
+
+.content {
+    background: #659ea2;
+}
+
+.title {
+    position: relative;
+    background: #9fa5a3;
+    height: 180px;
+    min-width: 1024px;
+    max-width: 1387px;
+    border-right: 5px #659ea2 dashed;
+    border-left: 5px #659ea2 dashed;
+    border-bottom: 7px #5d809c solid;
+}
+
+.main {
+    position: relative;
+    background-color: #a2dedb;
+    height: 800px;
+    min-width: 1024px;
+    max-width: 1387px;
+    border-right: 5px #659ea2 dashed;
+    border-left: 5px #659ea2 dashed;
+}
+
+#menu {
+    color: white;
+    background: #5780a0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: 0 -50% 0 0;
+    transform: translate(-50%, -50%);
+    height: 350px;
     width: 450px;
-    height: 330px;
-    margin-left: auto;
-    margin-right: auto;
-    background: url("../img/search/bckg_main.jpg");
-    border: 5px solid #927e6b;
+    font-size: 20px;
+    border: 7px #709bbb outset;
+}
+
+#logo {
+    background: #eff2ff;
+    margin-left: 40px;
+    margin-top: 10px;
+    padding: 10px;
+
+    width: 600px;
+    height: 110px;
+    border: 7px #95989b double;
+}
+
+#user_menu {
+    background: #eff2ff;
+    margin-right: 40px;
+    margin-top: 10px;
+    padding: 10px;
+
+    width: 200px;
+    height: 110px;
+
     text-align: center;
-    font: 16pt sans-serif; 
-    padding-left: auto;
-    padding-right: auto;
+    border: 7px #95989b double;
 }
 
-#input {
-    font: 1em sans-serif;
+#description {
+    margin-top: 20px;
+    text-align: center
 }
 
-input[type=text] {
-    width: 250px;  height: 30px; font: 1em sans-serif;
+#buttons {
+    margin-top: 80px;
+    margin-left: 72px;
+    margin-right: 72px;
 }
 
-input[type=submit] {
-    width: 150px;  height: 40px; font: 1em sans-serif;
+.checkbox, .checkbox_none, .checkbox_selected {
+    outline: none;
+    display: block;
+    text-decoration: none;
+    float: left;
+    width: 100px;
+    padding: 6px 0;
+    text-align: center;
+    font-size: 14px;
+    height: 22px;
+    line-height: 1.5em;
+    font-weight: bold;
+}
+
+.checkbox_none {
+    border: 1px solid #ddd;
+    border-bottom: 1px solid #aaa;
+    border-right: 1px solid #aaa;
+    background-color: #fff;
+    text-shadow: 1px 1px 1px #fff;
+}
+
+.checkbox_selected {
+    border: 1px solid #ddd;
+    border-bottom: 1px solid #aaa;
+    border-right: 1px solid #aaa;
+    background-color: #8bff86;
+    text-shadow: 1px 1px 1px #fff;
+}
+
+#buttons > form > input[type="text"] {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    height: 25px;
+    width: 302px;
+}
+
+#buttons > form {
+    padding-top: 50px;
+}
+
+#buttons > form > input[type="submit"] {
+    height: 30px;
+    width: 100px;
+    margin-left: 100px
 }

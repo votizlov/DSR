@@ -3,40 +3,92 @@
 
 <head>
     <title>DSR Practice task</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link   th:href="@{/css/result.css}" rel="stylesheet"/>
-    <script th:src="@{/js/lib/angular.js}" ></script>
-    <script th:src="@{/js/lib/jquery-3.4.1.js}"></script>
-    <script th:src="@{/js/controller/result.js}"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="css/result.css" rel="stylesheet"/>
+    <script src="js/lib/angular.js"></script>
+    <script src="js/lib/jquery-3.4.1.js"></script>
+    <script src="js/controller/result.js"></script>
 </head>
 <body>
-<div id="title" ng-controller="stageBook">
-    <div id="description" ng-init="initBook()">
-        <p>
-            Название книги : {{name}} <br>
-            Имя автора : {{author}} <br>
-
-        </p>
-    </div>
-    <div id="controller">
-        <form id="back" action="#" th:action="@{/resultExit}" method="post">
-            <input type="submit" value="Back"/>
-        </form>
-    </div>
-</div>
-<div id="content" ng-controller="comments">
-    <div id="comments">
-        <div id="comment">
-            <p>
-
-            </p>
-            <br>
-            <br>
-            <hr color='#bfa68e'/><br>
+<div class="page">
+    <div class="content">
+        <div class="block_title">
+            <div class="title">
+                <div id="logo">
+                    <p>
+                    <h1>Поисковик отзывов</h1>
+                    <h3>Task company DSR</h3>
+                    </p>
+                </div>
+                <div id="user_menu" ng-controller="back">
+                    User menu uuu
+                    <input id="back" type="submit" ng-click="toBack()" value="Выйти"/>
+                </div>
+            </div>
         </div>
+        <div class="block_item" ng-controller="stageItem">
+            <div class="column_item" ng-init="getItem()">
+                <div>
+                    <div class="block_img">
+                        <div id="img_item">
 
+                        </div>
+                    </div>
+                    <div id="main_desc_item">
+                        <p>{{item.itemID.firstName}}<br><br><br>
+                            {{item.itemID.lastName}}</p>
+                    </div>
+                </div>
+                <div id="desc_item">
+                    <p>{{item.desc}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="block_comments" ng-controller="comments">
+            <div class="column_comments" ng-init="getComments(1)">
+
+            </div>
+            <div class="pagesButtons">
+                <form>
+                    <button class="numbersPage" ng-click="getComments(1)">1</button>
+                    <button class="numbersPage" ng-click="getComments(2)">2</button>
+                    <button class="numbersPage" ng-click="getComments(3)">3</button>
+                    <button class="numbersPage" ng-click="getComments(4)">4</button>
+                    <button class="numbersPage" ng-click="getComments(5)">5</button>
+                </form>
+            </div>
+        </div>
     </div>
-    <button ng-click="pushComments(5)">Еще</button>
 </div>
 </body>
+<!--<body>-->
+<!--<div id="title" ng-controller="stageBook">-->
+<!--<div id="description" ng-init="initBook()">-->
+<!--<p>-->
+<!--Название книги : {{lastName}} <br>-->
+<!--Имя автора : {{firstName}} <br>-->
+
+<!--</p>-->
+<!--</div>-->
+<!--<div id="controller">-->
+<!--<form id="back" action="#" th:action="@{/resultExit}" method="post">-->
+<!--<input type="submit" value="Back"/>-->
+<!--</form>-->
+<!--</div>-->
+<!--</div>-->
+<!--<div id="content" ng-controller="comments">-->
+<!--<div id="comments">-->
+<!--<div id="comment">-->
+<!--<p>-->
+
+<!--</p>-->
+<!--<br>-->
+<!--<br>-->
+<!--<hr color='#bfa68e'/><br>-->
+<!--</div>-->
+
+<!--</div>-->
+<!--<button ng-click="pushComments(10)">Еще</button>-->
+<!--</div>-->
+<!--</body>-->
 </html>

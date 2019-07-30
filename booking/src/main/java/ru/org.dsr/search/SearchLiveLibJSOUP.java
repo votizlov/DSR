@@ -1,126 +1,98 @@
 package ru.org.dsr.search;
 
+import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import ru.org.dsr.domain.Book;
-import ru.org.dsr.domain.BookID;
+import ru.org.dsr.domain.Item;
+import ru.org.dsr.domain.ItemID;
+import ru.org.dsr.domain.Comment;
 import ru.org.dsr.exception.LoadedEmptyBlocksException;
 import ru.org.dsr.exception.NoFoundElementsException;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
-import ru.org.dsr.model.MainLog;
+import ru.org.dsr.search.factory.TypeResource;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class SearchLiveLibJSOUP implements Search {
+public class SearchLiveLibJSOUP extends AbstractSearch {
+    private static final Logger log = Logger.getLogger(SearchLiveLibJSOUP.class);
 
-    private final String SITE = "https://www.livelib.ru/";
-    private final String SEARCH = "https://www.livelib.ru/find/books/";
     private final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; rv:40.0) Gecko/20100101 Firefox/40.0 Chrome/74.0.3729.169 Safari/537.36";
     private final String URL_MAIN_BOOK;
 
-    private Queue<String> tmpComments;
     private Queue<String> books;
-    private BookID bookID;
-    private Logger log;
+    private ItemID itemID;
+    private int currentPage = 1;
 
-    public SearchLiveLibJSOUP(BookID bookID) throws RequestException, RobotException {
+    public SearchLiveLibJSOUP(ItemID itemID) throws RequestException, RobotException {
+        super("https://www.livelib.ru/find/books/", "https://www.livelib.ru/");
 
-        log = MainLog.getLog();
-
-        tmpComments = new LinkedList<>();
         books = new LinkedList<>();
 
-        String urlSearch = buildUrlSearchBook(bookID);
-        Document pageSearch = getDocBook(urlSearch);
-
-        System.out.println(urlSearch);
-
-        String tmp;
-        if ((tmp = pageSearch.select("body").text()) == null || tmp.equals(""))
-            throw new RobotException();
+        String urlSearch = buildUrlSearch(itemID);
+        Document pageSearch = getDoc(urlSearch);
 
         books = getUrlsBooks(pageSearch);
         URL_MAIN_BOOK = books.peek();
-        this.bookID = bookID;
+        this.itemID = itemID;
     }
 
-
-    @Override
-    public Book getBook() throws RequestException, RobotException {
-        System.out.println(URL_MAIN_BOOK);
-        return isEmpty() ? null : initBook();
+    SearchLiveLibJSOUP() {
+        super("https://www.livelib.ru/find/books/", "https://www.livelib.ru/");
+        URL_MAIN_BOOK = null;
     }
 
     @Override
-    public List<String> loadJsonComments(int count) throws RobotException {
-        LinkedList<String> comments = new LinkedList<>();
-        Iterator<String> it;
-        if (tmpComments.isEmpty()) {
-            List<String> loadedComments = null;
-            while (!books.isEmpty()) {
-                String urlBook = books.poll();
-                loadedComments = getComments(urlBook);
-                if (!loadedComments.isEmpty()) break;
+    public Item getItem() throws RobotException, RequestException {
+            return isEmpty() ? null : initBook();
+    }
+
+    @Override
+    public List<Comment> loadComments(int count) throws RobotException, RequestException {
+        LinkedList<Comment> comments = new LinkedList<>();
+        LinkedList<Comment> currentComments = new LinkedList<>();
+        for(;;) {
+            if (books.isEmpty()) break;
+            currentComments.addAll(getComments(String.format("%s%s%d%s", books.peek(), "/~", currentPage, "#reviews\"")));
+            if (currentComments.isEmpty()) {
+                currentPage = 1;
+                books.poll();
+                break;
+            } else {
+                currentPage++;
             }
-            assert loadedComments != null;
-            if (books.isEmpty() && loadedComments.isEmpty()) return null;
-            it = loadedComments.iterator();
+            Iterator<Comment> it = currentComments.iterator();
             for (int i = 0; i < count && it.hasNext(); i++) {
                 comments.add(it.next());
             }
-            while (it.hasNext()) {
-                tmpComments.add(it.next());
-            }
-        } else {
-            if (tmpComments.size() > count) {
-                for (int i = 0; i < count; i++) {
-                    comments.add(tmpComments.poll());
-                }
-            } else {
-                while (!tmpComments.isEmpty()) {
-                    comments.add(tmpComments.poll());
-                }
-                String urlBook = books.poll();
-                List<String> loadedComments = getComments(urlBook);
-                it = loadedComments.iterator();
-                for (int i = 0; i < count - comments.size() && it.hasNext(); i++) {
-                    comments.add(it.next());
-                }
-                while (it.hasNext()) {
-                    tmpComments.add(it.next());
-                }
-            }
+            if ((count -= currentComments.size()) < 0) break;
+            currentComments.clear();
         }
         return comments;
     }
 
     @Override
     public boolean isEmpty() {
-        return books.isEmpty() && tmpComments.isEmpty();
+        return books == null || books.isEmpty();
     }
 
-    private List<String> getComments (String urlBook) throws RobotException {
-        List<String> JSONComments = new LinkedList<>();
-        Document docBook;
-        try {
-            docBook = getDocBook(urlBook);
-        }
-        catch (RequestException e) {
-            log.log(Level.SEVERE, e.toString(), e);
-            return JSONComments;
-        }
+    @Override
+    public TypeResource getTypeResource() {
+        return TypeResource.LIVE_LIB;
+    }
 
+    private List<Comment> getComments (String urlBook) throws RobotException, RequestException {
+        List<Comment> comments = new LinkedList<>();
+        Document docBook;
+        docBook = getDoc(urlBook);
         Elements elementsOfComments = docBook.select("div.group-review.review-inner"); //block comments
         for (Element e : elementsOfComments) {
-            JSONComments.add(toJsonComment(e));
+            comments.add(initComment(e));
         }
-        return JSONComments;
+        return comments;
     }
 
     private LinkedList<String> getUrlsBooks(Document pageBooks) {
@@ -129,13 +101,11 @@ public class SearchLiveLibJSOUP implements Search {
         for (Element e :
                 els) {
             result.addLast(SITE + e.attr("href"));
-            System.out.println(SITE + e.attr("href"));
         }
         return result;
     }
 
-    private Book initBook() throws RequestException, RobotException {
-        System.out.println(URL_MAIN_BOOK);
+    private Item initBook() throws RequestException, RobotException {
         Document pageBook;
         try {
             pageBook = Jsoup.connect(URL_MAIN_BOOK)
@@ -145,41 +115,46 @@ public class SearchLiveLibJSOUP implements Search {
             throw new RequestException(URL_MAIN_BOOK, "get");
         }
 
-        String tmp;
-        if ((tmp = pageBook.select("body").text()) == null || tmp.equals(""))
-            throw new RobotException();
-
-        String text, name, author;
-        text = "Error load";
+        String desc = null, name, author, urlImg;
 
         try {
-            text = getDescriptionBook(pageBook);
+            desc = getDescriptionBook(pageBook);
         } catch (LoadedEmptyBlocksException e) {
-            log.log(Level.FINE, e.toString(), e);
+            log.warn(e.toString());
         } catch (NoFoundElementsException e) {
-            log.log(Level.WARNING, e.toString(), e);
+            log.warn(e.toString());
         }
 
         try {
             name = getNameBook(pageBook);
         } catch (LoadedEmptyBlocksException e) {
-            log.log(Level.FINE, e.toString(), e);
-            name = bookID.getName();
+            log.warn(e.toString());
+            name = itemID.getLastName();
         } catch (NoFoundElementsException e) {
-            log.log(Level.WARNING, e.toString(), e);
-            name = bookID.getName();
+            log.warn(e.toString());
+            name = itemID.getLastName();
         }
 
         try {
             author = getNameAuthor(pageBook);
         } catch (LoadedEmptyBlocksException e) {
-            log.log(Level.FINE, e.toString(), e);
-            author = bookID.getAuthor();
+            log.warn(e.toString());
+            author = itemID.getFirstName();
         } catch (NoFoundElementsException e) {
-            log.log(Level.WARNING, e.toString(), e);
-            author = bookID.getAuthor();
+            log.warn(e.toString());
+            author = itemID.getFirstName();
         }
-        return new Book(new BookID(author, name), text);
+
+        try {
+            urlImg = getUrlImg(pageBook);
+        } catch (LoadedEmptyBlocksException e) {
+            log.warn(e.toString());
+            urlImg = "";
+        } catch (NoFoundElementsException e) {
+            log.warn(e.toString());
+            urlImg = "";
+        }
+        return new Item(new ItemID(author, name, this.itemID.getType()), desc, urlImg);
     }
 
     private String getDescriptionBook(Document pageBook) throws NoFoundElementsException, LoadedEmptyBlocksException {
@@ -221,41 +196,23 @@ public class SearchLiveLibJSOUP implements Search {
         return name;
     }
 
-    private Document getDocBook(String urlBook) throws RequestException, RobotException {
-        try {
-            return getDocument(urlBook);
-        } catch (IOException e) {
-            throw new RequestException(urlBook, "get");
+    private String getUrlImg(Document pageBook) throws NoFoundElementsException, LoadedEmptyBlocksException {
+        Elements elsName = pageBook.select("img#main-image-book");
+        if (elsName == null || elsName.size() == 0) {
+            throw new NoFoundElementsException(URL_MAIN_BOOK, "img#main_image_book");
         }
+        String url = elsName.get(0).attr("src");
+        if (url == null || url.equals("")) {
+            throw new LoadedEmptyBlocksException(URL_MAIN_BOOK, "img#main_image_book", "#src");
+        }
+        return url;
     }
 
-    private String toJsonComment(Element e) {
+    private Comment initComment(Element e) {
         String title = e.select("a.post-scifi-title").text().replace('\"', '\'');
         String desc = e.select("div.description").text().replace('\"', '\'');
         String date = e.select("span.date").text().replace('\"', '\'');
         String author = e.select("a.a-login-black span").text().replace('\"', '\'');
-        return toJsonComments(author, title, desc, date, SITE);
+        return createComment(author, title, desc, date, SITE);
     }
-
-    private String buildUrlSearchBook(BookID bookID) {
-        String author = bookID.getAuthor();
-        String name = bookID.getName();
-        Scanner scanner = new Scanner(String.format("%s %s", name, author));
-        StringBuilder stringBuilder = new StringBuilder(
-                (name == null ? 0 : name.length())
-                        +(author == null ? 0 :author.length())+10
-        );
-        if (scanner.hasNext()) {
-            for(;;) {
-                stringBuilder.append(scanner.next());
-                if (scanner.hasNext()) {
-                    stringBuilder.append('+');
-                } else {
-                    break;
-                }
-            }
-        }
-        return SEARCH+stringBuilder.toString();
-    }
-
 }

@@ -1,59 +1,175 @@
-#title {
-    overflow:hidden;
-    width: 100%;
-    font: 20pt sans-serif;
-    border: #868686 ridge 6px;
-    height: 170px;
-    background: url("../img/search/bckg.jpg");
+.left, .block_img, #logo, #main_desc_item  {
+    float: left;
 }
-#controller {
-    margin-top: 65px;
-    margin-right: 80px;
+
+.right, #user_menu {
     float: right;
 }
-#controller input[type=submit] {
-    background-color: #d6c3a5;
-    border-bottom-color: #bfa68e;
+
+body {
+    margin: 0;
 }
 
-#description {
-    margin-top: 10px;
-    margin-left: 60px;
-    float: left;
-    height: 150px;
-    max-width: 800px;
-    border: #bfa68e ridge 3px;
-    background: #d6c3a5;
-}
-
-#back {
+.centerW, .title, .block_item, .block_comments, .column_item, .pagesButtons, .block_title, #back {
     margin-right: auto;
     margin-left: auto;
 }
-#back input[type=submit] {
-    width: 150px;  height: 40px; font: 1em sans-serif;
+
+.centerH {
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
 }
 
-#comments {
+.page {
+    min-width: auto;
+}
+
+.content {
     overflow:hidden;
-    background: #b9b9b9;
-    width: 100%;
-    min-height: 700px;
+    background: #380b9c;
+}
+
+.title {
+    position: relative;
+    background: #435ea8;
+    height: 165px;
+    min-width: 924px;
+    max-width: 1287px;
+    border: 5px #39caca dotted;
+}
+
+.block_title {
+    position: relative;
+    background: #5982e2;
+    height: 150px;
+    min-width: 1024px;
+    max-width: 1387px;
+}
+
+.block_item {
+    min-width: 924px;
+    max-width: 1287px;
+    background-color: #5982e2;
+    padding-right: 50px;
+    padding-left: 50px;
+    padding-top: 40px;
+    padding-bottom: 50px;
+}
+
+.column_item {
+    overflow: hidden;
+    min-height: 500px;
+    min-width: 924px;
+    max-width: 1287px;
     height: 100%;
-    border-bottom:#868686 6px ridge;
-    border-left:#868686 6px ridge;
-    border-right:#868686 6px ridge;
-    background: url("../img/search/bckg_main.jpg");
+    width: 100%;
+    background-color: #435ea8;
+    border: 5px #39caca dotted;
 }
 
-#comment {
-    font: 1.5em sans-serif;
-    padding-left: 30px;
-    width: 1100px;
+.block_img {
+    margin-top: 20px;
+    margin-left: 20px;
+    min-height: 400px;
+    min-width: 500px;
+    background-color: #7f8184;
+    border: 7px #95989b ridge;
 }
 
-button {
-    background-color: #d6c3a5;
-    border-bottom-color: #bfa68e;
-    width: 150px;  height: 40px; font: 1em sans-serif;
+.block_comments {
+    min-width: 924px;
+    max-width: 1287px;
+    background-color: #5982e2;
+    padding-right: 50px;
+    padding-left: 50px;
+    padding-top: 40px;
+    padding-bottom: 50px;
 }
+
+.column_comments {
+    background-color: #f5f5f5;
+    min-width: 924px;
+    max-width: 1287px;
+    min-height: 452px;
+    max-height: 100%;
+    border: 7px #95989b outset;
+}
+
+.numbersPage {
+    width: 30px;
+    height: 30px;
+}
+
+.pagesButtons {
+    margin-top: 10px;
+    width: 250px;
+}
+
+#logo {
+    background: rgb(232, 232, 232);
+    margin-left: 50px;
+    margin-top: 10px;
+    padding: 10px;
+
+    width: 600px;
+    height: 110px;
+    border: 7px #95989b double;
+}
+
+#user_menu {
+    background: #e8e8e8;
+    margin-right: 50px;
+    margin-top: 10px;
+    padding: 10px;
+
+    width: 200px;
+    height: 110px;
+
+    text-align: center;
+    border: 7px #95989b double;
+}
+
+#img_item {
+    margin: 10px;
+    min-height: 380px;
+    border: 10px solid #777777; /* Параметры рамки */
+    /* Добавляем фон */
+    background-repeat: no-repeat;
+    background-position: 100% 100%;
+    background-size: cover; /* Масштабируем фон */
+}
+
+#main_desc_item {
+    margin-right: 10px;
+    margin-left: 10px;
+    height: 420px;
+    width: 370px;
+    background: #435ea8;
+    word-wrap: break-word;
+    color: #d5d5d5;
+    font-size: 30px;
+}
+
+#desc_item {
+    margin-top: 480px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    background-color: #ededed;
+    min-height: 200px;
+    max-height: 100%;
+    font-size: 20px;
+
+    border: 7px #95989b outset;
+}
+
+.comment {
+    font-size: 25px;
+    margin-left: 40px;
+}
+
+#back {
+
+}
+
