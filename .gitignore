@@ -1,5 +1,6 @@
 */target/*
 */.idea/*
+*/.logs/*
 *.iml
 booking/classes/*
 information/temp*

@@ -2,9 +2,11 @@ package ru.org.dsr.search;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import ru.org.dsr.domain.Book;
+import ru.org.dsr.domain.Item;
+import ru.org.dsr.domain.Comment;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
+import ru.org.dsr.search.factory.TypeResource;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,28 +15,13 @@ public interface Search {
      String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; rv:40.0) Gecko/20100101 Firefox/40.0 Chrome/74.0.3729.169 Safari/537.36";
 
 
-     Book getBook() throws RequestException, RobotException;
+     Item getItem() throws RequestException, RobotException;
 
-     List<String> loadJsonComments(int count) throws RobotException;
+     List<Comment> loadComments(int count) throws RobotException, RequestException;
 
      boolean isEmpty();
 
-     default String toJsonComments(String author, String title, String desc, String date, String site) {
-          int mitCapacityBld = 45;
-          StringBuilder JSONCommentBuilder = new StringBuilder(
-                  title.length()+desc.length()+date.length()+author.length()+mitCapacityBld
-          );
-
-          JSONCommentBuilder.append('{');
-          JSONCommentBuilder.append(String.format("\"author\":\"%s\",", author));
-          JSONCommentBuilder.append(String.format("\"title\":\"%s\",", title));
-          JSONCommentBuilder.append(String.format("\"desc\":\"%s\",", desc));
-          JSONCommentBuilder.append(String.format("\"date\":\"%s\",", date));
-          JSONCommentBuilder.append(String.format("\"site\":\"%s\"", site));
-          JSONCommentBuilder.append('}');
-
-          return JSONCommentBuilder.toString();
-     }
+     TypeResource getTypeResource();
 
      default Document getDocument(String url) throws IOException, RobotException {
           Document doc = Jsoup.connect(url)
@@ -42,9 +29,14 @@ public interface Search {
                   .get();
 
           String tmp;
-          if ((tmp = doc.select("body").text()) == null || tmp.equals(""))
-               throw new RobotException();
+          if ((tmp = doc.select("body").text()) == null || tmp.isEmpty()
+                  || tmp.contains("много запросов"))
+               throw new RobotException(doc.toString());
 
           return doc;
+     }
+
+     default Comment createComment(String author, String title, String desc, String date, String site) {
+          return new Comment(site, author, title, desc, date);
      }
 }

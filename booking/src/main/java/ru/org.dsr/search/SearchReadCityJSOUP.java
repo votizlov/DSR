@@ -1,5 +1,6 @@
 package ru.org.dsr.search;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,20 +9,20 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import ru.org.dsr.domain.Book;
-import ru.org.dsr.domain.BookID;
+import ru.org.dsr.domain.Item;
+import ru.org.dsr.domain.ItemID;
+import ru.org.dsr.domain.Comment;
 import ru.org.dsr.exception.JSONImproperHandling;
 import ru.org.dsr.exception.NoFoundElementsException;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
-import ru.org.dsr.model.MainLog;
+import ru.org.dsr.search.factory.TypeResource;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class SearchReadCityJSOUP implements Search {
+    private static final Logger log = Logger.getLogger(SearchReadCityJSOUP.class);
 
     private final String SITE = "https://www.chitai-gorod.ru";
     private final String SEARCH = "https://www.chitai-gorod.ru/search.php";
@@ -29,80 +30,64 @@ public class SearchReadCityJSOUP implements Search {
     private final int MAX_COUNT_BOOKS = 50;
     private final JSONObject JSON_MAIN_BOOK;
 
-    private Queue<String> tmpComments;
     private Queue<JSONObject> books;
-    private Logger log;
+    private ItemID itemID;
 
-    public SearchReadCityJSOUP(BookID bookID) throws RequestException, RobotException, JSONImproperHandling {
-        log = MainLog.getLog();
 
-        tmpComments = new LinkedList<>();
+    public SearchReadCityJSOUP(ItemID itemID) throws RequestException, RobotException, JSONImproperHandling {
+
         books = new LinkedList<>();
-
-        String request = String.format("%s %s", bookID.getName(), bookID.getAuthor());
+        String request = String.format("%s %s", itemID.getFirstName(), itemID.getLastName());
         JSONObject[] jsonArray = getJsonBooks(request);
 
         assert jsonArray != null;
         books.addAll(Arrays.asList(jsonArray));
 
         JSON_MAIN_BOOK = jsonArray[0];
+        this.itemID = itemID;
     }
+
+    private SearchReadCityJSOUP() {
+        JSON_MAIN_BOOK = null;
+    }
+
 
     @Override
     public boolean isEmpty() {
-        return books.isEmpty() && tmpComments.isEmpty();
+        return books == null || books.isEmpty();
     }
 
     @Override
-    public List<String> loadJsonComments(int count) throws RobotException {
-        LinkedList<String> comments = new LinkedList<>();
-        Iterator<String> it;
-        if (tmpComments.isEmpty()) {
-            List<String> loadedComments = null;
-            while (!books.isEmpty()) {
-                JSONObject urlBook = books.poll();
-                loadedComments = getComments(urlBook);
-                if (!loadedComments.isEmpty()) break;
-            }
-            assert loadedComments != null;
-            if (books.isEmpty() && loadedComments.isEmpty()) return null;
-            it = loadedComments.iterator();
+    public List<Comment> loadComments(int count) throws RobotException, RequestException {
+        LinkedList<Comment> comments = new LinkedList<>();
+        LinkedList<Comment> currentComments = new LinkedList<>();
+        for (; ; ) {
+            if (books.isEmpty()) return comments;
+            List<Comment> gotComments = getComments(books.poll());
+            if (gotComments == null || gotComments.isEmpty()) continue;
+            currentComments.addAll(gotComments);
+            Iterator<Comment> it = currentComments.iterator();
             for (int i = 0; i < count && it.hasNext(); i++) {
                 comments.add(it.next());
             }
-            while (it.hasNext()) {
-                tmpComments.add(it.next());
-            }
-        } else {
-            if (tmpComments.size() > count) {
-                for (int i = 0; i < count; i++) {
-                    comments.add(tmpComments.poll());
-                }
-            } else {
-                while (!tmpComments.isEmpty()) {
-                    comments.add(tmpComments.poll());
-                }
-                JSONObject JSONBook = books.poll();
-                List<String> loadedComments = getComments(JSONBook);
-                it = loadedComments.iterator();
-                for (int i = 0; i < count-comments.size() && it.hasNext(); i++) {
-                    comments.add(it.next());
-                }
-                while (it.hasNext()) {
-                    tmpComments.add(it.next());
-                }
-            }
+            if ((count -= currentComments.size()) < 0) break;
+            currentComments.clear();
         }
         return comments;
     }
 
     @Override
-    public Book getBook() throws RobotException, RequestException {
+    public Item getItem() throws RobotException, RequestException {
         return initBook(JSON_MAIN_BOOK);
     }
 
-    private Book initBook(JSONObject JSONBook) throws RobotException, RequestException {
-        Book book = null;
+    @Override
+    public TypeResource getTypeResource() {
+        return TypeResource.READ_CITY;
+    }
+
+    private Item initBook(JSONObject JSONBook) throws RobotException, RequestException {
+        Item item = null;
         String name, author, description;
         try {
             Document pageBook = getDocBook(JSON_MAIN_BOOK);
@@ -112,7 +97,7 @@ public class SearchReadCityJSOUP implements Search {
             }
             description = elsDescription.get(0).text();
         } catch (NoFoundElementsException | JSONImproperHandling e) {
-            log.log(Level.WARNING, e.toString(), e);
+            e.printStackTrace();
             description = "Error: not found elements";
         }
 
@@ -120,7 +105,7 @@ public class SearchReadCityJSOUP implements Search {
             name = JSONBook.getJSONObject("_source")
                     .getString("name");
         } catch (JSONException e) {
-            log.log(Level.FINE, e.toString(), e);
+            e.printStackTrace();
             name = "Error: not found elements";
         }
 
@@ -129,13 +114,13 @@ public class SearchReadCityJSOUP implements Search {
             author = JSONBook.getJSONObject("_source")
                     .getString("author");
         } catch (JSONException e) {
-            log.log(Level.FINE, e.toString(), e);
+            e.printStackTrace();
             author = "Error: not found elements";
         }
 
-        book = new Book(new BookID(author, name), description);
+        item = new Item(new ItemID(author, name, this.itemID.getType()), description);
 
-        return book;
+        return item;
     }
 
     private JSONObject[] getJsonBooks(String request) throws RobotException,
@@ -151,9 +136,8 @@ public class SearchReadCityJSOUP implements Search {
                     .method(Connection.Method.POST)
                     .execute()
                     .body();
-
             if (json != null && json.contains("<META NAME=\"robots\" CONTENT=\"noindex,nofollow\">")) {
-                throw new RobotException();
+                throw new RobotException(json);
             }
 
             JSONArray jsonArray = new JSONObject(json)
@@ -174,32 +158,29 @@ public class SearchReadCityJSOUP implements Search {
         }
     }
 
-    private List<String> getComments (JSONObject JSONBook) throws RobotException {
-        List<String> JSONComments = new LinkedList<>();
+    private List<Comment> getComments (JSONObject JSONBook) throws RobotException, RequestException {
+        if (books.isEmpty()) return null;
+        List<Comment> comments = new LinkedList<>();
         Document docBook;
         try {
             docBook = getDocBook(JSONBook);
-        }
-        catch (RequestException e) {
-            log.log(Level.SEVERE, e.toString(), e);
-            return JSONComments;
         } catch (JSONImproperHandling e) {
-            log.log(Level.WARNING, e.toString(), e);
-            return JSONComments;
+            log.error(e.toString(), e);
+            return comments;
         }
         Elements elementsOfComments = docBook.select("div.card_review"); //block comments
         for (Element e : elementsOfComments) {
-            JSONComments.add(toJsonComment(e));
+            comments.add(getComment(e));
         }
-        return JSONComments;
+        return comments;
     }
 
-    private String toJsonComment(Element e) {
+    private Comment getComment(Element e) {
         String title = e.select("div.review__title").text().replace('\"', '\'');
         String desc = e.select("div.review__text.text").text().replace('\"', '\'');
         String date = e.select("div.review__date").text().replace('\"', '\'');
         String author = e.select("div.review__author").text().replace('\"', '\'');
-        return toJsonComments(author, title, desc, date, SITE);
+        return createComment(author, title, desc, date, SITE);
     }
 
     private JSONObject[] toArray(JSONArray jsonArray) throws JSONException {

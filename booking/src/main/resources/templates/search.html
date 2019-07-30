@@ -1,45 +1,48 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html ng-app="searchApp">
 <head>
     <title>DSR Practice task</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <link href="..\static\css\search.css" th:href="@{/css/search.css}" rel="stylesheet"/>
+    <link href="css/search.css" rel="stylesheet"/>
+    <script src="js/lib/angular.js"></script>
+    <script src="js/lib/jquery-3.4.1.js"></script>
+    <script src="js/controller/search.js"></script>
 </head>
-
 <body>
-<div id="title">
-    <div id="logo">
-        <p>
-            Поисковик отзывов!
-        </p>
-        <p>
-            Этот сервис позволяет узнать об определенной книге <br>
-            сразу с нескольких ресурсов в три клика! <br>
-            (p. s. пока что одного...)
-        </p>
-    </div>
-</div>
-<div id="background">
-    <div id="main">
-        <div id="description">
-            <br>
-            Введит имя автора и название книги, <br>
-            затем нажмите поиск
-            </p>
+<div class="page">
+    <div class="content">
+        <div class="title">
+            <div id="logo">
+                <p>
+                <h1>Поисковик отзывов</h1>
+                <h3>Task company DSR</h3>
+                </p>
+            </div>
+
+            <div id="user_menu">
+                User menu is here
+            </div>
+
         </div>
-        <div id="controller">
-            <form action="#" th:action="@{/search}" th:object="${bookID}" method="post">
-                <!-- на самом деле без разницу, в любом случае bookID
-                будет пересоздано с параметрами, полученными из запроса
-                к сайту -->
-                <input type='text' required th:field="*{name}" placeholder="Name book"/> <br><br>
-                <input type='text' th:field="*{author}" placeholder="Name Author"/> <br><br>
-                <input type="submit" value="Поиск"/>
-            </form>
+        <div class="main">
+            <div id="menu">
+                <div id="description">
+                    Choose your destiny
+                </div>
+                <div id="buttons" ng-controller="search_menu">
+                    <a ng-click="selectType('BOOK')" href="" id="check-book" class="checkbox_selected">Книги</a>
+                    <a ng-click="selectType('MOVIE')" href="" id="check-movie" class="checkbox_none">Фильмы</a>
+                    <a  ng-click="selectType('GAME')" href="" id="check-game" class="checkbox_none">Игры</a>
+
+                    <form>
+                        <input id="first-name" required type="text" placeholder="  Название книги"/>
+                        <input id="last-name" type="text" placeholder="  Имя автора"/>
+                        <input id="toResult" type="submit" ng-click="saveItemID()" value="Найти"/>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 </body>
-
 </html>
