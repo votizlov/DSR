@@ -9,15 +9,12 @@ public class SearchController {
 
     @GetMapping("/search")
     public ModelAndView toSearch() {
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("search");
-        return mav;
+        return new ModelAndView("search");
     }
 
     @GetMapping("/")
-    public String toMain() {
-
-        return "redirect:search";
+    public ModelAndView toMain() {
+        return new ModelAndView("redirect:/search");
     }
 
 }

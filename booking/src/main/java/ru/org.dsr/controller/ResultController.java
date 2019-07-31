@@ -39,9 +39,7 @@ public class ResultController {
 
     @GetMapping("/result")
     public ModelAndView toResult() {
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("result");
-        return mav;
+        return new ModelAndView("result");
     }
 
     @ResponseBody

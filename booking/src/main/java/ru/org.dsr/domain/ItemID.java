@@ -11,6 +11,9 @@ public class ItemID {
         this.type = type;
     }
 
+    public ItemID() {
+    }
+
     public String getFirstName() {
         return firstName;
     }
