@@ -31,6 +31,7 @@ public class SearchReadCityJSOUP implements Search {
     private final JSONObject JSON_MAIN_BOOK;
 
     private Queue<JSONObject> books;
+    private Queue<Comment> temp;
     private ItemID itemID;
 
 
@@ -47,31 +48,24 @@ public class SearchReadCityJSOUP implements Search {
         this.itemID = itemID;
     }
 
-    private SearchReadCityJSOUP() {
-        JSON_MAIN_BOOK = null;
-    }
-
-
     @Override
     public boolean isEmpty() {
-        return books == null || books.isEmpty();
-    }
+        return (books == null || books.isEmpty()) && (temp == null || temp.isEmpty());    }
 
     @Override
     public List<Comment> loadComments(int count) throws RobotException, RequestException {
         LinkedList<Comment> comments = new LinkedList<>();
-        LinkedList<Comment> currentComments = new LinkedList<>();
-        for (; ; ) {
-            if (books.isEmpty()) return comments;
-            List<Comment> gotComments = getComments(books.poll());
-            if (gotComments == null || gotComments.isEmpty()) continue;
-            currentComments.addAll(gotComments);
-            Iterator<Comment> it = currentComments.iterator();
-            for (int i = 0; i < count && it.hasNext(); i++) {
-                comments.add(it.next());
+        if (temp != null)
+            while (!temp.isEmpty() && count > 0) {
+                comments.add(temp.poll());
+                count--;
             }
-            if ((count -= currentComments.size()) < 0) break;
-            currentComments.clear();
+        for (;count>0 && !books.isEmpty(); ) {
+            temp = getComments(books.poll());
+            for (int i = 0; i < count && !temp.isEmpty(); i++) {
+                comments.add(temp.poll());
+            }
+            count -= temp.size();
         }
         return comments;
     }
@@ -158,9 +152,8 @@ public class SearchReadCityJSOUP implements Search {
         }
     }
 
-    private List<Comment> getComments (JSONObject JSONBook) throws RobotException, RequestException {
-        if (books.isEmpty()) return null;
-        List<Comment> comments = new LinkedList<>();
+    private LinkedList<Comment> getComments (JSONObject JSONBook) throws RobotException, RequestException {
+        LinkedList<Comment> comments = new LinkedList<>();
         Document docBook;
         try {
             docBook = getDocBook(JSONBook);
@@ -199,7 +192,7 @@ public class SearchReadCityJSOUP implements Search {
             String suffix = JSONBook.getJSONObject("_source").getString("main_url");
             siteBook = String.format("%s%s", SITE, suffix);
 
-            return getDocument(siteBook);
+            return getDocument(siteBook, TypeResource.READ_CITY);
 
         } catch (JSONException e) {
             throw new JSONImproperHandling(JSONBook.toString(), "unknown param: _source || main_url");

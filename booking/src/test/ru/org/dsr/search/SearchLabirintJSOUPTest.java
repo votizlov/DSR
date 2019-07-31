@@ -9,9 +9,8 @@ import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
 import ru.org.dsr.search.factory.TypeResource;
 
+import java.util.LinkedList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SearchLabirintJSOUPTest {
 
@@ -25,6 +24,7 @@ class SearchLabirintJSOUPTest {
             try {
                 search = new SearchLabirintJSOUP(itemID);
                 Item item = search.getItem();
+                Assert.assertNotNull(item);
                 Assert.assertTrue(item != null &&
                         item.getItemID()!=null &&
                         item.getItemID().getFirstName() != null &&
@@ -35,23 +35,44 @@ class SearchLabirintJSOUPTest {
                 e.printStackTrace();
             }
         } catch (RobotException e) {
-            return;
+            e.printStackTrace();
         }
     }
 
-    @Test
-    void loadComments() {
-        itemID = new ItemID("Автостопом по Галактике", "", "MOVIE");
+    @org.junit.jupiter.api.Test
+    void loadCommentsFull() {
         try {
             try {
+                ItemID itemID = new ItemID("Автостопом по галактике", "", "MOVIE");
                 search = new SearchLabirintJSOUP(itemID);
-                List<Comment> comments = search.loadComments(20);
-                Assert.assertTrue((100 == comments.size() || search.isEmpty()) && 100 >= comments.size());
+                List<Comment> comments = search.loadComments(100);
+                int n;
+                Assert.assertTrue((100 == (n = comments.size()) || search.isEmpty()) && 100 >= n && n > 0);
             } catch (RequestException e) {
                 e.printStackTrace();
             }
         } catch (RobotException e) {
-            return;
+            e.printStackTrace();
+        }
+    }
+
+    @org.junit.jupiter.api.Test
+    void loadCommentsParts() {
+        try {
+            try {
+                ItemID itemID = new ItemID("Автостопом по галактике", "", "MOVIE");
+                search = new SearchLabirintJSOUP(itemID);
+                List<Comment> comments = new LinkedList<>();
+                int n, part = 10;
+                for (int i = 0; i < part*10; i+=part) {
+                    comments.addAll(search.loadComments(part));
+                    Assert.assertTrue((i+10 == (n = comments.size()) || search.isEmpty()) && n > 0);
+                }
+            } catch (RequestException e) {
+                e.printStackTrace();
+            }
+        } catch (RobotException e) {
+            e.printStackTrace();
         }
     }
 

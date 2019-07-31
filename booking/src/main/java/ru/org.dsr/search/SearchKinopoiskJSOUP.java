@@ -7,10 +7,7 @@ import org.jsoup.select.Elements;
 import ru.org.dsr.domain.Comment;
 import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
-import ru.org.dsr.exception.LoadedEmptyBlocksException;
-import ru.org.dsr.exception.NoFoundElementsException;
-import ru.org.dsr.exception.RequestException;
-import ru.org.dsr.exception.RobotException;
+import ru.org.dsr.exception.*;
 import ru.org.dsr.search.factory.TypeResource;
 
 import java.util.*;
@@ -20,22 +17,25 @@ public class SearchKinopoiskJSOUP extends AbstractSearch{
 
     private final String FORM_URL_PAGE_COMMENTS = "https://www.kinopoisk.ru%s/reviews/ord/rating/status/all/perpage/200/page/%d";
     private final String URL_MAIN_ITEM;
-    private Queue<String> movies;
+    private String movieID;
+    private Queue<Comment> temp;
     private ItemID itemID;
 
     public SearchKinopoiskJSOUP(ItemID itemID) throws RobotException, RequestException {
-        super("https://www.kinopoisk.ru/index.php?kp_query=", "https://www.kinopoisk.ru");
+        super("https://www.kinopoisk.ru/index.php?kp_query=", "https://www.kinopoisk.ru", TypeResource.KINOPOISK);
         String url = buildUrlSearch(itemID);
         Document document = getDoc(url);
-        movies = getUrlsMovies(document);
-        URL_MAIN_ITEM = SITE + movies.peek();
-        if (URL_MAIN_ITEM == null)
-            throw new RobotException(document.toString());
+        try {
+            movieID = getUrlsItem(document);
+        } catch (NoFoundElementsException e) {
+            log.warn(e);
+        }
+        URL_MAIN_ITEM = String.format("%s%s",SITE, movieID);
         this.itemID = itemID;
     }
 
     SearchKinopoiskJSOUP() {
-        super("https://www.kinopoisk.ru/index.php?kp_query=", "https://www.kinopoisk.ru");
+        super("https://www.kinopoisk.ru/index.php?kp_query=", "https://www.kinopoisk.ru", TypeResource.KINOPOISK);
         URL_MAIN_ITEM = null;
     }
 
@@ -45,38 +45,40 @@ public class SearchKinopoiskJSOUP extends AbstractSearch{
     }
 
     @Override
-    public List<Comment> loadComments(int count) throws RobotException, RequestException {
+    public List<Comment> loadComments(int count) throws RobotException {
         LinkedList<Comment> comments = new LinkedList<>();
-        LinkedList<Comment> currentComments = new LinkedList<>();
-        for(;;) {
-            if (isEmpty()) break;
-            currentComments.addAll(getComments(String.format(FORM_URL_PAGE_COMMENTS, movies.poll(), 1)));
-            Iterator<Comment> it = currentComments.iterator();
-            for (int i = 0; i < count && it.hasNext(); i++) {
-                comments.add(it.next());
+        if (temp != null)
+            while (!temp.isEmpty() && count > 0) {
+                comments.add(temp.poll());
+                count--;
             }
-            if ((count -= currentComments.size()) < 0) break;
-            currentComments.clear();
+        if (count>0 && movieID!=null) {
+            temp = getComments(String.format(FORM_URL_PAGE_COMMENTS, movieID, 1));
+            int i;
+            for (i = 0; i < count && !temp.isEmpty(); i++) {
+                comments.add(temp.poll());
+            }
+            movieID = null;
         }
         return comments;
     }
 
     @Override
     public boolean isEmpty() {
-        return movies == null || movies.isEmpty();
+        return (movieID == null && temp == null) ||  (movieID == null && temp.isEmpty());
     }
 
-    @Override
-    public TypeResource getTypeResource() {
-        return TypeResource.KINOPOISK;
-    }
+    private Queue<Comment> getComments (String urlBook) throws RobotException {
+        LinkedList<Comment> comments = new LinkedList<>();
+        Document docItem;
+        try {
+            docItem = getDoc(urlBook);
+        } catch (RequestException e) {
+            log.info(e+"\nDidn't comments find?");
+            return comments;
+        }
 
-    private List<Comment> getComments (String urlBook) throws RobotException, RequestException {
-        List<Comment> comments = new LinkedList<>();
-        Document docBook;
-        docBook = getDoc(urlBook);
-
-        Elements elementsOfComments = docBook.select("div.reviewItem.userReview > div.response.good"); //block comments
+        Elements elementsOfComments = docItem.select("div.reviewItem.userReview > div.response.good"); //block comments
         for (Element e : elementsOfComments) {
             comments.add(initComment(e));
         }
@@ -180,13 +182,15 @@ public class SearchKinopoiskJSOUP extends AbstractSearch{
         return urlImg;
     }
 
-    private LinkedList<String> getUrlsMovies(Document pages) {
-        LinkedList<String> result = new LinkedList<>();
-        Elements els = pages.select("#block_left_pad > div > div > div > p > a");
-        for (Element e :
-                els) {
-            result.addLast(e.attr("data-url"));
+    private String getUrlsItem(Document pages) throws NoFoundElementsException {
+        String result;
+        Elements els = pages.select("div.element.most_wanted > p.pic > a");
+        if (els.size() != 1) {
+            els = pages.select("div.element > p.pic > a");
+            if (els.size() != 1)
+                throw new NoFoundElementsException(SEARCH, "only one : div.element.most_wanted > p.pic > a");
         }
+        result = els.get(0).attr("data-url");
         return result;
     }
 }

@@ -1,7 +1,9 @@
 package ru.org.dsr.services;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.org.dsr.config.ConfigFactory;
 import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.domain.Comment;
@@ -23,13 +25,15 @@ public class ManagerSearch {
     private Collection<Search> sites;
     private Search mainSearch;
 
+    @Autowired
+    private ConfigFactory configFactory;
     private FactoryPackSearch factory;
 
     public ManagerSearch() {}
 
     public void init(ItemID itemID) throws RobotException {
         try {
-            factory = new FactoryPackSearch();
+            factory = new FactoryPackSearch(configFactory);
         } catch (PropertiesException e) {
             log.fatal(e.getNeed(), e);
         }

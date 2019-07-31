@@ -72,4 +72,15 @@ public class ConfigFactory {
     public void setData(HashMap<TypeItem, List<TypeResource>> data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "ConfigFactory{" +
+                "resources=" + resources +
+                ", mainSearchMovie='" + mainSearchMovie + '\'' +
+                ", mainSearchGame='" + mainSearchGame + '\'' +
+                ", mainSearchBook='" + mainSearchBook + '\'' +
+                ", data=" + data +
+                '}';
+    }
 }

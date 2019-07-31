@@ -1,34 +1,33 @@
 package ru.org.dsr.search;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import ru.org.dsr.domain.Comment;
-import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
-import ru.org.dsr.search.Search;
+import ru.org.dsr.search.factory.TypeResource;
 
 import java.io.IOException;
 import java.util.Scanner;
 
 public abstract class AbstractSearch implements Search {
 
-    private final String SEARCH;
+    protected final String SEARCH;
     protected final String SITE;
+    protected final TypeResource TYPE_RESOURCE;
 
-    AbstractSearch(String search, String site) {
+    AbstractSearch(String search, String site, TypeResource typeResource) {
         SEARCH = search;
         SITE = site;
+        this.TYPE_RESOURCE = typeResource;
     }
 
     protected String buildUrlSearch(ItemID itemID) {
-        String author = itemID.getFirstName();
-        String name = itemID.getLastName();
-        Scanner scanner = new Scanner(String.format("%s %s", name, author));
+        String lastName = itemID.getLastName();
+        String firstName = itemID.getFirstName();
+        Scanner scanner = new Scanner(String.format("%s %s", firstName, lastName));
         StringBuilder stringBuilder = new StringBuilder(
-                (name == null ? 0 : name.length())
-                        +(author == null ? 0 :author.length())+10
+                (firstName == null ? 0 : firstName.length())
+                        +(lastName == null ? 0 :lastName.length())+10
         );
         if (scanner.hasNext()) {
             for(;;) {
@@ -45,9 +44,14 @@ public abstract class AbstractSearch implements Search {
 
     protected Document getDoc(String urlBook) throws RequestException, RobotException {
         try {
-            return getDocument(urlBook);
+            return getDocument(urlBook, TYPE_RESOURCE);
         } catch (IOException e) {
             throw new RequestException(urlBook, "get");
         }
+    }
+
+    @Override
+    public TypeResource getTypeResource() {
+        return TYPE_RESOURCE;
     }
 }

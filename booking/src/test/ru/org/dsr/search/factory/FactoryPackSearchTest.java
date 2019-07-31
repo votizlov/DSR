@@ -2,16 +2,20 @@ package ru.org.dsr.search.factory;
 
 import junit.framework.Assert;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import ru.org.dsr.config.ConfigFactory;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.domain.PackSearch;
 import ru.org.dsr.exception.PropertiesException;
 import ru.org.dsr.search.Search;
 
 class FactoryPackSearchTest {
+    @Autowired
+    ConfigFactory configFactory;
     FactoryPackSearch factoryPackSearch;
     {
         try {
-            factoryPackSearch = new FactoryPackSearch();
+            factoryPackSearch = new FactoryPackSearch(configFactory);
         } catch (PropertiesException e) {
             e.printStackTrace();
         }

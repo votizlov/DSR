@@ -24,24 +24,25 @@ public class SearchLiveLibJSOUP extends AbstractSearch {
     private final String URL_MAIN_BOOK;
 
     private Queue<String> books;
+    private Queue<Comment> temp;
     private ItemID itemID;
     private int currentPage = 1;
 
     public SearchLiveLibJSOUP(ItemID itemID) throws RequestException, RobotException {
-        super("https://www.livelib.ru/find/books/", "https://www.livelib.ru/");
+        super("https://www.livelib.ru/find/books/", "https://www.livelib.ru/", TypeResource.LIVE_LIB);
 
         books = new LinkedList<>();
 
         String urlSearch = buildUrlSearch(itemID);
         Document pageSearch = getDoc(urlSearch);
 
-        books = getUrlsBooks(pageSearch);
+        books = getUrlsItem(pageSearch);
         URL_MAIN_BOOK = books.peek();
         this.itemID = itemID;
     }
 
     SearchLiveLibJSOUP() {
-        super("https://www.livelib.ru/find/books/", "https://www.livelib.ru/");
+        super("https://www.livelib.ru/find/books/", "https://www.livelib.ru/", TypeResource.LIVE_LIB);
         URL_MAIN_BOOK = null;
     }
 
@@ -53,39 +54,35 @@ public class SearchLiveLibJSOUP extends AbstractSearch {
     @Override
     public List<Comment> loadComments(int count) throws RobotException, RequestException {
         LinkedList<Comment> comments = new LinkedList<>();
-        LinkedList<Comment> currentComments = new LinkedList<>();
-        for(;;) {
-            if (books.isEmpty()) break;
-            currentComments.addAll(getComments(String.format("%s%s%d%s", books.peek(), "/~", currentPage, "#reviews\"")));
-            if (currentComments.isEmpty()) {
+        if (temp != null)
+            while (!temp.isEmpty() && count > 0) {
+                comments.add(temp.poll());
+                count--;
+            }
+        for(;count > 0 && !books.isEmpty();) {
+            temp = getComments(String.format("%s%s%d%s", books.peek(), "/~", currentPage, "#reviews\""));
+            if (temp.isEmpty()) {
                 currentPage = 1;
                 books.poll();
                 break;
             } else {
                 currentPage++;
             }
-            Iterator<Comment> it = currentComments.iterator();
-            for (int i = 0; i < count && it.hasNext(); i++) {
-                comments.add(it.next());
+            int i;
+            for (i = 0; i < count && !temp.isEmpty(); i++) {
+                comments.add(temp.poll());
             }
-            if ((count -= currentComments.size()) < 0) break;
-            currentComments.clear();
+            count -= i;
         }
         return comments;
     }
 
     @Override
     public boolean isEmpty() {
-        return books == null || books.isEmpty();
-    }
+        return (books == null || books.isEmpty()) && (temp == null || temp.isEmpty());    }
 
-    @Override
-    public TypeResource getTypeResource() {
-        return TypeResource.LIVE_LIB;
-    }
-
-    private List<Comment> getComments (String urlBook) throws RobotException, RequestException {
-        List<Comment> comments = new LinkedList<>();
+    private LinkedList<Comment> getComments (String urlBook) throws RobotException, RequestException {
+        LinkedList<Comment> comments = new LinkedList<>();
         Document docBook;
         docBook = getDoc(urlBook);
         Elements elementsOfComments = docBook.select("div.group-review.review-inner"); //block comments
@@ -95,7 +92,7 @@ public class SearchLiveLibJSOUP extends AbstractSearch {
         return comments;
     }
 
-    private LinkedList<String> getUrlsBooks(Document pageBooks) {
+    private LinkedList<String> getUrlsItem(Document pageBooks) {
         LinkedList<String> result = new LinkedList<>();
         Elements els = pageBooks.select("div#objects-block.objects-wrapper div.brow-title a.title");
         for (Element e :

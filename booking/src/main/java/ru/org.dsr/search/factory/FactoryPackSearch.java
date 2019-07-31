@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.org.dsr.config.ConfigFactory;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.domain.PackSearch;
+import ru.org.dsr.exception.*;
 import ru.org.dsr.exception.JSONImproperHandling;
 import ru.org.dsr.exception.PropertiesException;
 import ru.org.dsr.exception.RequestException;
@@ -17,18 +18,13 @@ import java.util.List;
 
 public class FactoryPackSearch {
     private static final Logger log = Logger.getLogger(FactoryPackSearch.class);
+    private String mainSearchBook;
+    private String mainSearchMovie;
+    private String mainSearchGame;
+    private List<String> resource;
+    private HashMap<TypeItem, List<TypeResource>> data;
 
-    @Autowired
-    ConfigFactory configFactory;
-
-    String mainSearchBook;
-    String mainSearchMovie;
-    String mainSearchGame;
-    List<String> resource;
-    HashMap<TypeItem, List<TypeResource>> data;
-
-    public FactoryPackSearch() throws PropertiesException {
-
+    public FactoryPackSearch(ConfigFactory configFactory) throws PropertiesException {
 //        if (!checkConfiguration(mainSearchMovie)) {
 //            throw new PropertiesException("mainSearchMovie didn't find");
 //        }
@@ -105,9 +101,9 @@ public class FactoryPackSearch {
                         } else {
                             searches.add(createSearch(type, itemID));
                         }
-                        log.info(type + " connected");
+                        log.info(String.format("%s%s", type, " connected"));
                     } catch (RobotException e) {
-                        log.info(type + " is close\n" + e.getSrcForRobot());
+                        log.info(String.format("%s%s%s", type, " is close\n", e.toString()));
                     } catch (RequestException e) {
                         log.fatal(e.toString(), e);
                     } catch (JSONImproperHandling e) {
@@ -127,9 +123,9 @@ public class FactoryPackSearch {
                         } else {
                             searches.add(createSearch(type, itemID));
                         }
-                        log.info(type + " connected");
+                        log.info(String.format("%s%s", type, " connected"));
                     } catch (RobotException e) {
-                        log.info(type + " is close\n" + e.getSrcForRobot());
+                        log.info(String.format("%s%s%s", type, " is close\n", e.getSrcForRobot()));
                     } catch (RequestException e) {
                         log.fatal(e.toString(), e);
                     } catch (JSONImproperHandling e) {
@@ -149,9 +145,9 @@ public class FactoryPackSearch {
                         } else {
                             searches.add(createSearch(type, itemID));
                         }
-                        log.info(type + " connected");
+                        log.info(String.format("%s%s", type, " connected"));
                     } catch (RobotException e) {
-                        log.info(type + " is close\n" + e.getSrcForRobot());
+                        log.info(String.format("%s%s%s", type, " is close\n", e.getSrcForRobot()));
                     } catch (RequestException e) {
                         log.fatal(e.toString(), e);
                     } catch (JSONImproperHandling e) {

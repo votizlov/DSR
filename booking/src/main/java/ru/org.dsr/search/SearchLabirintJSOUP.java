@@ -12,22 +12,22 @@ import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
 import ru.org.dsr.search.factory.TypeResource;
 
-import java.io.IOException;
 import java.util.*;
 
 public class SearchLabirintJSOUP extends AbstractSearch {
     private static final Logger log = Logger.getLogger(SearchLabirintJSOUP.class);
-
     private final String REVIEWS_COMMENTS = "https://www.labirint.ru/reviews/goods";
 
-    private String urlImg = "https://img2.labirint.ru/books45/%scovermid.jpg";
+    private final String URL_IMG_FORM = "https://img2.labirint.ru/books45/%scovermid.jpg";
+    private String urlImg;
     private String urlMainBook;
 
     private Queue<String> books;
     private ItemID itemID;
+    private Queue<Comment> temp;
 
     public SearchLabirintJSOUP(ItemID itemID) throws RobotException, RequestException {
-        super("https://www.labirint.ru/search/", "https://www.labirint.ru");
+        super("https://www.labirint.ru/search/", "https://www.labirint.ru", TypeResource.LABIRINT);
 
         String url = buildUrlSearch(itemID);
         books = getUrlBooks(url);
@@ -36,7 +36,7 @@ public class SearchLabirintJSOUP extends AbstractSearch {
     }
 
     SearchLabirintJSOUP() {
-        super("https://www.labirint.ru/search/", "https://www.labirint.ru");
+        super("https://www.labirint.ru/search/", "https://www.labirint.ru", TypeResource.LABIRINT);
     }
 
     @Override
@@ -47,28 +47,25 @@ public class SearchLabirintJSOUP extends AbstractSearch {
     @Override
     public List<Comment> loadComments(int count) throws RobotException, RequestException {
         LinkedList<Comment> comments = new LinkedList<>();
-        LinkedList<Comment> currentComments = new LinkedList<>();
-        for(;;) {
-            if (books.isEmpty()) break;
-            currentComments.addAll(getComments(books.poll()));
-            Iterator<Comment> it = currentComments.iterator();
-            for (int i = 0; i < count && it.hasNext(); i++) {
-                comments.add(it.next());
+        if (temp != null)
+            while (!temp.isEmpty() && count > 0) {
+                comments.add(temp.poll());
+                count--;
             }
-            if ((count -= currentComments.size()) < 0) break;
-            currentComments.clear();
+        for(;count > 0 && !books.isEmpty();) {
+            temp = getComments(books.poll());
+            int i;
+            for (i = 0; i < count && !temp.isEmpty(); i++) {
+                comments.add(temp.poll());
+            }
+            count -= i;
         }
         return comments;
     }
 
     @Override
     public boolean isEmpty() {
-        return books == null || books.isEmpty();
-    }
-
-    @Override
-    public TypeResource getTypeResource() {
-        return TypeResource.LABIRINT;
+        return (books == null || books.isEmpty()) && (temp == null || temp.isEmpty());
     }
 
     private Item initBook() throws RobotException, RequestException {
@@ -116,23 +113,23 @@ public class SearchLabirintJSOUP extends AbstractSearch {
         return elsDesc.get(0).text();
     }
 
-    private List<Comment> getComments (String urlBook) throws RobotException, RequestException {
-        List<Comment> comments = new LinkedList<>();
+    private Queue<Comment> getComments (String urlBook) throws RobotException, RequestException {
+        LinkedList<Comment> comments = new LinkedList<>();
         Document docBook;
         docBook = getDoc(urlBook);
 
         Elements els = docBook.select("#product-comments > div");
         if (els == null || els.isEmpty()) return comments;
-        Element columnComments = els.get(0);
+        Element elementsComment = els.get(0);
         try {
-            comments = initComments(columnComments, urlBook);
+            comments = initComments(elementsComment, urlBook);
         } catch (NoFoundElementsException e) {
             log.warn(e.toString());
         }
         return comments;
     }
 
-    private List<Comment> initComments(Element column, String url) throws NoFoundElementsException {
+    private LinkedList<Comment> initComments(Element column, String url) throws NoFoundElementsException {
         LinkedList<Comment> comments = new LinkedList<>();
         Elements elsAuthor = column.select("div.comment-user-info-top > div.user-name > a");
         if (elsAuthor == null || elsAuthor.isEmpty())
@@ -165,17 +162,19 @@ public class SearchLabirintJSOUP extends AbstractSearch {
         return e.text();
     }
 
-    private Queue<String> getUrlBooks(String url) throws RobotException, RequestException {
+    private LinkedList<String> getUrlBooks(String url) throws RobotException, RequestException {
         Document document;
         document = getDoc(url);
-        LinkedList books = new LinkedList();
+        LinkedList<String> books = new LinkedList<>();
         Elements els = document.select("#rubric-tab > div.b-search-page-content > div > div.products-row-outer.responsive-cards > div > div > div > div.product-cover > a");
-        if (els == null || els.isEmpty()) return books;
-        urlMainBook = SITE + els.get(0).attr("href");
-        urlImg = String.format(urlImg, els.get(0).attr("href").substring(7));
+        if (els == null || els.isEmpty()) {
+            return books;
+        }
+        String id = els.get(0).attr("href");
+        urlMainBook = SITE + id;
+        urlImg = String.format(URL_IMG_FORM, id.substring(7));
         for (Element e :
                 els) {
-            String id = null;
             String path = e.attr("href");
             if (path.contains("books")) {
                 id = path.substring(6, path.length()-1);
