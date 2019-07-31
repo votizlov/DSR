@@ -8,6 +8,21 @@
     <script src="js/lib/angular.js"></script>
     <script src="js/lib/jquery-3.4.1.js"></script>
     <script src="js/controller/result.js"></script>
+    <script type="text/javascript">
+        function openComment(id) {
+            console.log(id);
+            $('#preview-comment_number_'+id).css("display", "none");
+            $('#full-comment_number_'+id).css("display", "block");
+            return false;
+        }
+
+        function hideComment(id) {
+            console.log(id);
+            $('#preview-comment_number_'+id).css("display", "block");
+            $('#full-comment_number_'+id).css("display", "none");
+            return false;
+        }
+    </script>
 </head>
 <body>
 <div class="page">
