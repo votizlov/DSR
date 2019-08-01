@@ -10,17 +10,19 @@ import ru.org.dsr.domain.PackSearch;
 import ru.org.dsr.exception.PropertiesException;
 import ru.org.dsr.search.Search;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 class FactoryPackSearchTest {
-    ConfigFactory configFactory;
     FactoryPackSearch factoryPackSearch;
     {
+        ConfigFactory configFactory;
         configFactory = new ConfigFactory();
         configFactory.setMainBook(TypeResource.LABIRINT);
         configFactory.setMainMovie(TypeResource.KINOPOISK);
-        configFactory.setMainGame(null);
+        configFactory.setMainGame(TypeResource.GAME);
+        configFactory.setResources(new ArrayList<>(Arrays.asList(TypeResource.values())));
         try {
             configFactory.afterPropertiesSet();
         } catch (PropertiesException e) {

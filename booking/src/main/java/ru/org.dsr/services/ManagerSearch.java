@@ -31,6 +31,11 @@ public class ManagerSearch {
 
     public ManagerSearch() {}
 
+    //for test
+    public ManagerSearch(ConfigFactory configFactory) {
+        this.configFactory = configFactory;
+    }
+
     public void init(ItemID itemID) throws RobotException {
         factory = new FactoryPackSearch(configFactory);
         PackSearch packSearch = factory.createPackSearch(itemID);
