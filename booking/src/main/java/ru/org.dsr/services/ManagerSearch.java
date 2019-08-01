@@ -32,11 +32,7 @@ public class ManagerSearch {
     public ManagerSearch() {}
 
     public void init(ItemID itemID) throws RobotException {
-        try {
-            factory = new FactoryPackSearch(configFactory);
-        } catch (PropertiesException e) {
-            log.fatal(e.getNeed(), e);
-        }
+        factory = new FactoryPackSearch(configFactory);
         PackSearch packSearch = factory.createPackSearch(itemID);
         sites = packSearch.getSearches();
         mainSearch = packSearch.getMainSearch();

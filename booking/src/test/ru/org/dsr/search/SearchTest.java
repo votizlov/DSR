@@ -16,9 +16,9 @@ class SearchTest {
     @Test
     void getDoc() {
         Document document = null;
-        search = new SearchLiveLibJSOUP();
+        search = new SearchLabirintJSOUP();
         try {
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 300; i++) {
                 document = search.getDoc(search.SITE);
                 if (i%10 == 0) System.out.println(i);
             }
