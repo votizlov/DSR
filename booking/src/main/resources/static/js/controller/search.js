@@ -50,12 +50,15 @@ searchApp.controller("search_menu", function($scope, $http) {
                 document.location.href = "result";
             } else {
                 console.log("init isn't complied!");
+                clearTimeout(loadTime);
+                $("#toResult").attr("value", "Найти");
                 console.log(response);
                 return;
             }
         }, function (reason) {
             console.log(reason);
             clearTimeout(loadTime);
+            $("#toResult").attr("value", "Найти");
         });
         loadTime = setInterval(function() {
             let suf = '';
