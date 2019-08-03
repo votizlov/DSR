@@ -5,7 +5,6 @@ resultApp.controller('stageItem', function($scope, $http) {
     $scope.getItem = function () {
         $http.post("/result-getItem").then(function (response) {
             $scope.item = response.data;
-            console.log('url('+$scope.item.urlImg+')');
             $("#img_item").css("background-image", 'url('+$scope.item.urlImg+')');
         }, function (response) {
             console.log(response);
@@ -16,14 +15,41 @@ resultApp.controller('stageItem', function($scope, $http) {
 resultApp.controller('comments', function ($scope, $http) {
 
     $scope.getComments = function (page) {
-        console.log(page);
         $http.post("/result-getComments", page).then(function (value) {
             $(".column_comments").html("");
+            let i = 1;
             value.data.forEach(function (comment) {
                     let selector = $(".column_comments");
-                    let piece = '<div class="comment">'+'<p>'+comment.author+'<h2>'+comment.title+'</h2>'+
-                        comment.desc+'<br>'+'<br>'+comment.date+'<br>'+comment.site+'</p>'+'</div>'+"<hr color='#bfa68e'/><br>";
+                    let piece;
+                    if (comment.desc.length > 255) {
+                        piece =
+                            '<div class="comment">' +
+                            '<p>' + comment.author +
+                            '<h2>' + comment.title + '</h2>' +
+                            '<div id="preview-comment_number_' + i + '">' +
+                            comment.desc.substring(0, 255) + '...' + '<br>' +
+                            '<div class="centerW" style="width: 100px"><button class="view" onclick="openComment(' + i + ')">Открыть</button></div>' + '<br>' +
+                            '</div>' +
+                            '<div id="full-comment_number_' + i + '" style="display: none">' +
+                            comment.desc + '<br>' +
+                            '<div class="centerW" style="width: 100px"><button class="view" onclick="hideComment(' + i + ')">Закрыть</button></div>' + '<br>' +
+                            '</div>' +
+                            comment.date + '<br>' +
+                            comment.site + '</p>' +
+                            '</div>' + "<hr color='#949799'/><br>";
+                    } else {
+                        piece =
+                            '<div class="comment">' +
+                            '<p>' + comment.author +
+                            '<h2>' + comment.title + '</h2>' +
+                            comment.desc + '<br>' + '<br>' +
+                            comment.date + '<br>' +
+                            comment.site + '</p>' +
+                            '</div>' + "<hr color='#949799'/><br>";
+                    }
+
                     selector.append(piece);
+                    i++;
             })
         }, function (reason) {
             console.log(reason);
@@ -34,7 +60,6 @@ resultApp.controller('comments', function ($scope, $http) {
 resultApp.controller('back', function ($scope, $http) {
     $scope.toBack = function () {
         $http.delete("/result-clear").then(function (value) {
-            console.log(value);
             if (value.data)
                 document.location.href = "search";
         }, function (reason) {

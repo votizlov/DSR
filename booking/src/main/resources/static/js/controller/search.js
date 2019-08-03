@@ -28,8 +28,8 @@ searchApp.controller("search_menu", function($scope, $http) {
                 break
             }
             default : {
-                console.log("warning switch type search!");
-                $scope.type = "unknown";
+                console.log("warning switch type search! Now type is \'BOOK\'");
+                $scope.type = "BOOK";
                 return
             }
         }
@@ -43,9 +43,7 @@ searchApp.controller("search_menu", function($scope, $http) {
         itemID.lastName = $("#last-name").val();
         if (itemID.firstName === "") return;
         itemID.type = $scope.type;
-        console.log(itemID);
-        let JSONItemID = JSON.stringify(itemID);
-        console.log(JSONItemID);
+        let loadTime;
         $http.post("/result-init", itemID).then(function (response) {
             if (response.data) {
                 console.log("init is complied!");
@@ -57,8 +55,9 @@ searchApp.controller("search_menu", function($scope, $http) {
             }
         }, function (reason) {
             console.log(reason);
+            clearTimeout(loadTime);
         });
-        setInterval(function() {
+        loadTime = setInterval(function() {
             let suf = '';
             for (let j = 0; j < $scope.i % 3; j++) {
                 suf+='.';
