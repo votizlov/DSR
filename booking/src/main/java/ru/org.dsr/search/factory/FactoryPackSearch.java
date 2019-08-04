@@ -29,7 +29,7 @@ public class FactoryPackSearch {
     }
 
     public PackSearch createPackSearch(ItemID itemID) {
-        TypeItem typeItem = TypeItem.valueOf(itemID.getType());
+        TypeItem typeItem = itemID.getType();
         LinkedList<Search> searches = new LinkedList<>();
         Search mainSearch = null;
         switch (typeItem) {

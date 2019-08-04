@@ -8,7 +8,7 @@ import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.exception.PropertiesException;
 import ru.org.dsr.exception.RobotException;
-import ru.org.dsr.search.factory.FactoryPackSearch;
+import ru.org.dsr.search.factory.TypeItem;
 import ru.org.dsr.search.factory.TypeResource;
 import ru.org.dsr.services.ManagerSearch;
 
@@ -36,7 +36,7 @@ class ManagerSearchTest {
     @Test
     void getCommentsBook() {
         managerSearch = new ManagerSearch(configFactory);
-        ItemID itemID = new ItemID("Автостопом по галактике", "", "BOOK");
+        ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.BOOK);
         try {
             managerSearch.init(itemID);
         } catch (RobotException e) {
@@ -49,7 +49,7 @@ class ManagerSearchTest {
     @Test
     void getItemBook() {
         managerSearch = new ManagerSearch(configFactory);
-        ItemID itemID = new ItemID("Автостопом по галактике", "", "BOOK");
+        ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.BOOK);
         try {
             managerSearch.init(itemID);
         } catch (RobotException e) {
@@ -67,7 +67,7 @@ class ManagerSearchTest {
     @Test
     void getCommentsMovie() {
         managerSearch = new ManagerSearch(configFactory);
-        ItemID itemID = new ItemID("Автостопом по галактике", "", "BOOK");
+        ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.MOVIE);
         try {
             managerSearch.init(itemID);
         } catch (RobotException e) {
@@ -80,7 +80,7 @@ class ManagerSearchTest {
     @Test
     void getItemMovie() {
         managerSearch = new ManagerSearch(configFactory);
-        ItemID itemID = new ItemID("Автостопом по галактике", "", "BOOK");
+        ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.MOVIE);
         try {
             managerSearch.init(itemID);
         } catch (RobotException e) {

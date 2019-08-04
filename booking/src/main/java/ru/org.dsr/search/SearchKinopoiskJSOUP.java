@@ -8,6 +8,7 @@ import ru.org.dsr.domain.Comment;
 import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.exception.*;
+import ru.org.dsr.search.factory.TypeItem;
 import ru.org.dsr.search.factory.TypeResource;
 
 import java.util.*;
@@ -135,7 +136,7 @@ public class SearchKinopoiskJSOUP extends AbstractSearch{
             log.warn(e.toString());
             urlImg = "";
         }
-        return new Item(new ItemID(firstName, lastName, "MOVIE"), desc, urlImg);
+        return new Item(new ItemID(firstName, lastName, TypeItem.MOVIE), desc, urlImg);
     }
 
     private String getFirstName(Document document) throws NoFoundElementsException, LoadedEmptyBlocksException {
@@ -161,13 +162,13 @@ public class SearchKinopoiskJSOUP extends AbstractSearch{
     }
 
     private String getDesc(Document document) throws NoFoundElementsException, LoadedEmptyBlocksException {
-        Elements elsDesc = document.select("#syn > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(1) > td > span > div");
+        Elements elsDesc = document.select("div.brand_words.film-synopsys");
         if (elsDesc == null || elsDesc.isEmpty()) {
-            throw new NoFoundElementsException(URL_MAIN_ITEM, "#syn > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(1) > td > span > div");
+            throw new NoFoundElementsException(URL_MAIN_ITEM, "div.brand_words.film-synopsys");
         }
         String desc = elsDesc.get(0).text();
         if (desc == null || desc.isEmpty())
-            throw new LoadedEmptyBlocksException("#text", "#infoTable > table > tbody > tr:nth-child(6) > td:nth-child(2) > a", URL_MAIN_ITEM);
+            throw new LoadedEmptyBlocksException("#text", "div.brand_words.film-synopsys", URL_MAIN_ITEM);
         return desc;
     }
 

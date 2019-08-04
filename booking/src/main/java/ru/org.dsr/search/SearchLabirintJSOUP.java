@@ -10,6 +10,7 @@ import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.exception.NoFoundElementsException;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
+import ru.org.dsr.search.factory.TypeItem;
 import ru.org.dsr.search.factory.TypeResource;
 
 import java.util.*;
@@ -86,7 +87,7 @@ public class SearchLabirintJSOUP extends AbstractSearch {
         } catch (NoFoundElementsException e) {
             log.warn(e.toString());
         }
-        return new Item(new ItemID(firstName, lastName, "MOVIE"), desc, this.urlImg);
+        return new Item(new ItemID(firstName, lastName, TypeItem.BOOK), desc, this.urlImg);
     }
 
     private String getFirstName(Document document) throws NoFoundElementsException {

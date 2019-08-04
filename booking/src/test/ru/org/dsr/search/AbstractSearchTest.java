@@ -6,13 +6,14 @@ import ru.org.dsr.domain.Comment;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
+import ru.org.dsr.search.factory.TypeItem;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class AbstractSearchTest {
 
     AbstractSearch search;
-    ItemID itemID = new ItemID("Some item", "search", "");
+    ItemID itemID = new ItemID("Some item", "search", TypeItem.MOVIE);
 
     @org.junit.jupiter.api.Test
     void buildUrlSearchLiveLib() {

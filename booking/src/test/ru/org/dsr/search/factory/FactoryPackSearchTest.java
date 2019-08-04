@@ -33,7 +33,7 @@ class FactoryPackSearchTest {
 
     @Test
     void createPackSearch() {
-        PackSearch packSearch = factoryPackSearch.createPackSearch(new ItemID("Остров проклятых", "", "MOVIE"));
+        PackSearch packSearch = factoryPackSearch.createPackSearch(new ItemID("Остров проклятых", "", TypeItem.MOVIE));
         boolean b = true;
         for (Search s :
                 packSearch.getSearches()) {
@@ -46,7 +46,7 @@ class FactoryPackSearchTest {
         }
         Assert.assertTrue(b);
 
-        packSearch = factoryPackSearch.createPackSearch(new ItemID("Автостопом по галактике", "", "BOOK"));
+        packSearch = factoryPackSearch.createPackSearch(new ItemID("Автостопом по галактике", "", TypeItem.BOOK));
         b = true;
         for (Search s :
                 packSearch.getSearches()) {

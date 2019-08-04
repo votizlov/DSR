@@ -155,13 +155,13 @@ public class SearchLiveLibJSOUP extends AbstractSearch {
     }
 
     private String getDescriptionBook(Document pageBook) throws NoFoundElementsException, LoadedEmptyBlocksException {
-        Elements elements = pageBook.select("div.block p#full-description");
+        Elements elements = pageBook.select("div#book-right-data-left.book-right-data-left > div.block");
         if (elements == null || elements.size() == 0) {
-            throw new NoFoundElementsException(URL_MAIN_BOOK, "div.block p#full-description");
+            throw new NoFoundElementsException(URL_MAIN_BOOK, "div#book-right-data-left.book-right-data-left > div.block");
         }
         String text = elements.get(0).text();
         if (text == null) {
-            throw new LoadedEmptyBlocksException(URL_MAIN_BOOK, "p#full-description", "#text");
+            throw new LoadedEmptyBlocksException(URL_MAIN_BOOK, "div#book-right-data-left.book-right-data-left > div.block", "#text");
         }
         return text;
     }

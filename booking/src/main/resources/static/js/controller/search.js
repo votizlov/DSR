@@ -44,10 +44,10 @@ searchApp.controller("search_menu", function($scope, $http) {
         if (itemID.firstName === "") return;
         itemID.type = $scope.type;
         let loadTime;
-        $http.post("/result-init", itemID).then(function (response) {
-            if (response.data) {
-                console.log("init is complied!");
-                document.location.href = "result";
+        $http.put("/cache/save", itemID).then(function (response) {
+            if (response.data !== -1) {
+                sessionStorage.setItem("id", response.data);
+                document.location.href = "content";
             } else {
                 console.log("init isn't complied!");
                 clearTimeout(loadTime);
@@ -60,6 +60,7 @@ searchApp.controller("search_menu", function($scope, $http) {
             clearTimeout(loadTime);
             $("#toResult").attr("value", "Найти");
         });
+
         loadTime = setInterval(function() {
             let suf = '';
             for (let j = 0; j < $scope.i % 3; j++) {

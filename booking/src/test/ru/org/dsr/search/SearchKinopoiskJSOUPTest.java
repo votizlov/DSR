@@ -6,6 +6,7 @@ import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
+import ru.org.dsr.search.factory.TypeItem;
 import ru.org.dsr.search.factory.TypeResource;
 
 import java.util.LinkedList;
@@ -19,7 +20,7 @@ class SearchKinopoiskJSOUPTest {
     void getItem() {
         try {
             try {
-                ItemID itemID = new ItemID("Автостопом по галактике", "", "MOVIE");
+                ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.MOVIE);
                 search = new SearchKinopoiskJSOUP(itemID);
                 Item item = search.getItem();
                 Assert.assertNotNull(item);
@@ -40,7 +41,7 @@ class SearchKinopoiskJSOUPTest {
     void loadCommentsFull() {
         try {
             try {
-                ItemID itemID = new ItemID("Автостопом по галактике", "", "MOVIE");
+                ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.MOVIE);
                 search = new SearchKinopoiskJSOUP(itemID);
                 List<Comment> comments = search.loadComments(1000);
                 int n;
@@ -57,7 +58,7 @@ class SearchKinopoiskJSOUPTest {
     void loadCommentsParts() {
         try {
             try {
-                ItemID itemID = new ItemID("Автостопом по галактике", "", "MOVIE");
+                ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.MOVIE);
                 search = new SearchKinopoiskJSOUP(itemID);
                 List<Comment> comments = new LinkedList<>();
                 int n, part = 10;

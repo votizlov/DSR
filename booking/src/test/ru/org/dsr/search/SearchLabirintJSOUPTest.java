@@ -7,6 +7,7 @@ import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
+import ru.org.dsr.search.factory.TypeItem;
 import ru.org.dsr.search.factory.TypeResource;
 
 import java.util.LinkedList;
@@ -19,7 +20,7 @@ class SearchLabirintJSOUPTest {
 
     @Test
     void getItem() {
-        itemID = new ItemID("Автостопом по Галактике", "", "MOVIE");
+        itemID = new ItemID("Автостопом по Галактике", "", TypeItem.BOOK);
         try {
             try {
                 search = new SearchLabirintJSOUP(itemID);
@@ -43,7 +44,7 @@ class SearchLabirintJSOUPTest {
     void loadCommentsFull() {
         try {
             try {
-                ItemID itemID = new ItemID("Автостопом по галактике", "", "MOVIE");
+                ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.BOOK);
                 search = new SearchLabirintJSOUP(itemID);
                 List<Comment> comments = search.loadComments(100);
                 int n;
@@ -60,7 +61,7 @@ class SearchLabirintJSOUPTest {
     void loadCommentsParts() {
         try {
             try {
-                ItemID itemID = new ItemID("Автостопом по галактике", "", "MOVIE");
+                ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.BOOK);
                 search = new SearchLabirintJSOUP(itemID);
                 List<Comment> comments = new LinkedList<>();
                 int n, part = 10;

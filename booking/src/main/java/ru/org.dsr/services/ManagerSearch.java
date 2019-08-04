@@ -7,7 +7,6 @@ import ru.org.dsr.config.ConfigFactory;
 import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.domain.Comment;
-import ru.org.dsr.exception.PropertiesException;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
 import ru.org.dsr.search.Search;

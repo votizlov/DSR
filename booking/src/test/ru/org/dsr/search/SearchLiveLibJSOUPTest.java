@@ -7,12 +7,11 @@ import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
+import ru.org.dsr.search.factory.TypeItem;
 import ru.org.dsr.search.factory.TypeResource;
 
 import java.util.LinkedList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SearchLiveLibJSOUPTest {
     SearchLiveLibJSOUP search;
@@ -20,7 +19,7 @@ class SearchLiveLibJSOUPTest {
 
     @Test
     void getItem() {
-        itemID = new ItemID("Автостопом по Галактике", "", "MOVIE");
+        itemID = new ItemID("Автостопом по Галактике", "", TypeItem.BOOK);
         try {
             try {
                 search = new SearchLiveLibJSOUP(itemID);
@@ -44,7 +43,7 @@ class SearchLiveLibJSOUPTest {
     void loadCommentsFull() {
         try {
             try {
-                ItemID itemID = new ItemID("Автостопом по галактике", "", "MOVIE");
+                ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.BOOK);
                 search = new SearchLiveLibJSOUP(itemID);
                 List<Comment> comments = search.loadComments(100);
                 int n;
@@ -61,7 +60,7 @@ class SearchLiveLibJSOUPTest {
     void loadCommentsParts() {
         try {
             try {
-                ItemID itemID = new ItemID("Автостопом по галактике", "", "MOVIE");
+                ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.BOOK);
                 search = new SearchLiveLibJSOUP(itemID);
                 List<Comment> comments = new LinkedList<>();
                 int n, part = 10;

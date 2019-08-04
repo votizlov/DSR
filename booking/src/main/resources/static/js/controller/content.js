@@ -3,7 +3,9 @@ resultApp.controller('stageItem', function($scope, $http) {
     $scope.item = {};
 
     $scope.getItem = function () {
-        $http.post("/result-getItem").then(function (response) {
+        let id = sessionStorage.getItem("id");
+        console.log(id);
+        $http.post("/cache/item", id).then(function (response) {
             $scope.item = response.data;
             $("#img_item").css("background-image", 'url('+$scope.item.urlImg+')');
         }, function (response) {
@@ -15,7 +17,8 @@ resultApp.controller('stageItem', function($scope, $http) {
 resultApp.controller('comments', function ($scope, $http) {
 
     $scope.getComments = function (page) {
-        $http.post("/result-getComments", page).then(function (value) {
+        let id = sessionStorage.getItem("id");
+        $http.post("/cache/comments?page="+page, id).then(function (value) {
             $(".column_comments").html("");
             let i = 1;
             value.data.forEach(function (comment) {
@@ -59,7 +62,7 @@ resultApp.controller('comments', function ($scope, $http) {
 
 resultApp.controller('back', function ($scope, $http) {
     $scope.toBack = function () {
-        $http.delete("/result-clear").then(function (value) {
+        $http.delete("/cache/delete").then(function (value) {
             if (value.data)
                 document.location.href = "search";
         }, function (reason) {
