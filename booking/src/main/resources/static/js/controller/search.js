@@ -62,6 +62,9 @@ searchApp.controller("search_menu", function($scope, $http) {
                     "обобщите."
                 );
                 clearTimeout(loadTime);
+                $("#toResult").attr("value", "Найти");
+                console.log(response);
+                return;
             }
         }, function (reason) {
             console.log(reason);
