@@ -44,16 +44,24 @@ searchApp.controller("search_menu", function($scope, $http) {
         if (itemID.firstName === "") return;
         itemID.type = $scope.type;
         let loadTime;
+        $("#buttons").css("margin-top", "36px");
+        $("#description").html("").append(
+            "Производится поиск информации о продукте.<br>"+
+            "Это может занять некоторое время.<br>" +
+            "Пожалуйста подождите..."
+        );
         $http.put("/cache/save", itemID).then(function (response) {
             if (response.data !== -1) {
                 sessionStorage.setItem("id", response.data);
                 document.location.href = "content";
             } else {
-                console.log("init isn't complied!");
+                $("#buttons").css("margin-top", "36px");
+                $("#description").html("").append(
+                    "Искомый продукт не найден, <br>" +
+                    "пожалуйста, уточните информацию или <br>" +
+                    "обобщите."
+                );
                 clearTimeout(loadTime);
-                $("#toResult").attr("value", "Найти");
-                console.log(response);
-                return;
             }
         }, function (reason) {
             console.log(reason);

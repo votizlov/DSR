@@ -117,6 +117,7 @@ public class SearchLabirintJSOUP extends AbstractSearch {
         Elements els = docBook.select(cnf.SELECT_COMMENTS);
         if (els == null || els.isEmpty()) return comments;
         Element elementsComment = els.get(0);
+        if (elementsComment.text().isEmpty()) return comments;
         try {
             comments = initComments(elementsComment, urlBook);
         } catch (NoFoundElementsException e) {
