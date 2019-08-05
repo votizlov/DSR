@@ -1,6 +1,5 @@
 package ru.org.dsr.domain;
 
-import org.springframework.stereotype.Component;
 import ru.org.dsr.search.factory.TypeItem;
 
 public class ItemID {

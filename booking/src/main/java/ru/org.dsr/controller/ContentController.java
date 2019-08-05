@@ -16,7 +16,6 @@ import ru.org.dsr.services.ManagerSearch;
 
 import java.util.List;
 
-@RestController
 public class ContentController {
 
     private static final Logger log = Logger.getLogger(SearchKinopoiskJSOUP.class);
@@ -34,7 +33,7 @@ public class ContentController {
     }
 
     @GetMapping("/content")
-    public ModelAndView toResult() {
+    public ModelAndView toContent() {
         return new ModelAndView("result");
     }
 

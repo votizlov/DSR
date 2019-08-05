@@ -19,7 +19,7 @@ class SearchTest {
         search = new SearchLabirintJSOUP();
         try {
             for (int i = 0; i < 300; i++) {
-                document = search.getDoc(search.SITE);
+                document = search.getDoc(search.cnf.SITE);
                 if (i%10 == 0) System.out.println(i);
             }
             System.out.println(document);

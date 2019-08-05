@@ -2,6 +2,7 @@ package ru.org.dsr.config;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -11,7 +12,7 @@ import ru.org.dsr.search.factory.TypeResource;
 
 import java.util.*;
 
-@Component
+@Configuration
 @PropertySource("classpath:application.properties")
 @ConfigurationProperties("factory")
 @Scope("singleton")

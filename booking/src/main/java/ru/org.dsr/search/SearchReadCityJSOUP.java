@@ -192,7 +192,7 @@ public class SearchReadCityJSOUP implements Search {
             String suffix = JSONBook.getJSONObject("_source").getString("main_url");
             siteBook = String.format("%s%s", SITE, suffix);
 
-            return getDocument(siteBook, TypeResource.READ_CITY);
+            return connect(siteBook, TypeResource.READ_CITY);
 
         } catch (JSONException e) {
             throw new JSONImproperHandling(JSONBook.toString(), "unknown param: _source || main_url");

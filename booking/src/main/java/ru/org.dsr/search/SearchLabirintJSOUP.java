@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import ru.org.dsr.config.ConfigLabirint;
 import ru.org.dsr.domain.Comment;
 import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
@@ -11,33 +12,27 @@ import ru.org.dsr.exception.NoFoundElementsException;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
 import ru.org.dsr.search.factory.TypeItem;
-import ru.org.dsr.search.factory.TypeResource;
 
 import java.util.*;
 
 public class SearchLabirintJSOUP extends AbstractSearch {
     private static final Logger log = Logger.getLogger(SearchLabirintJSOUP.class);
-    private final String REVIEWS_COMMENTS = "https://www.labirint.ru/reviews/goods";
-
-    private final String URL_IMG_FORM = "https://img2.labirint.ru/books45/%scovermid.jpg";
     private String urlImg;
     private String urlMainBook;
 
     private Queue<String> books;
-    private ItemID itemID;
     private Queue<Comment> temp;
 
-    public SearchLabirintJSOUP(ItemID itemID) throws RobotException, RequestException {
-        super("https://www.labirint.ru/search/", "https://www.labirint.ru", TypeResource.LABIRINT);
+    ConfigLabirint cnf = new ConfigLabirint();
 
+    public SearchLabirintJSOUP(ItemID itemID) throws RobotException, RequestException {
+        initConfig(cnf);
         String url = buildUrlSearch(itemID);
         books = getUrlBooks(url);
-
-        this.itemID = itemID;
     }
 
     SearchLabirintJSOUP() {
-        super("https://www.labirint.ru/search/", "https://www.labirint.ru", TypeResource.LABIRINT);
+        initConfig(cnf);
     }
 
     @Override
@@ -91,25 +86,25 @@ public class SearchLabirintJSOUP extends AbstractSearch {
     }
 
     private String getFirstName(Document document) throws NoFoundElementsException {
-        Elements elsFirstName = document.select("#product-title > h1");
+        Elements elsFirstName = document.select(cnf.SELECT_ITEM_FIRST_NAME);
         if (elsFirstName == null || elsFirstName.isEmpty()) {
-            throw new NoFoundElementsException(urlMainBook, "#product-title > h1");
+            throw new NoFoundElementsException(urlMainBook,cnf.SELECT_ITEM_FIRST_NAME);
         }
         return elsFirstName.get(0).text();
     }
 
     private String getLastName(Document document) throws NoFoundElementsException {
-        Elements elsLastName = document.select("#product-specs > div.product-description > div:nth-child(2)");
+        Elements elsLastName = document.select(cnf.SELECT_ITEM_LAST_NAME);
         if (elsLastName == null || elsLastName.isEmpty()) {
-            throw new NoFoundElementsException(urlMainBook, "#product-specs > div.product-description > div:nth-child(2)");
+            throw new NoFoundElementsException(urlMainBook, cnf.SELECT_ITEM_LAST_NAME);
         }
         return elsLastName.get(0).text();
     }
 
     private String getDesc(Document document) throws NoFoundElementsException {
-        Elements elsDesc = document.select("#product-about > p > noindex");
+        Elements elsDesc = document.select(cnf.SELECT_ITEM_DESC);
         if (elsDesc == null || elsDesc.isEmpty()) {
-            throw new NoFoundElementsException(urlMainBook, "#product-about > p > noindex");
+            throw new NoFoundElementsException(urlMainBook,cnf.SELECT_ITEM_DESC);
         }
         return elsDesc.get(0).text();
     }
@@ -119,7 +114,7 @@ public class SearchLabirintJSOUP extends AbstractSearch {
         Document docBook;
         docBook = getDoc(urlBook);
 
-        Elements els = docBook.select("#product-comments > div");
+        Elements els = docBook.select(cnf.SELECT_COMMENTS);
         if (els == null || els.isEmpty()) return comments;
         Element elementsComment = els.get(0);
         try {
@@ -132,20 +127,20 @@ public class SearchLabirintJSOUP extends AbstractSearch {
 
     private LinkedList<Comment> initComments(Element column, String url) throws NoFoundElementsException {
         LinkedList<Comment> comments = new LinkedList<>();
-        Elements elsAuthor = column.select("div.comment-user-info-top > div.user-name > a");
+        Elements elsAuthor = column.select(cnf.SELECT_COMMENT_AUTHOR);
         if (elsAuthor == null || elsAuthor.isEmpty())
-            throw new NoFoundElementsException(url, "div.comment-user-info-top > div.user-name > a");
-        Elements elsDesc = column.select("div > div > div > p");
+            throw new NoFoundElementsException(url, cnf.SELECT_COMMENT_AUTHOR);
+        Elements elsDesc = column.select(cnf.SELECT_COMMENT_DESC);
         if (elsDesc == null || elsDesc.isEmpty())
-            throw new NoFoundElementsException(url, "div > div > div > p");
-        Elements elsDate = column.select("div > noindex > div > div.date");
+            throw new NoFoundElementsException(url, cnf.SELECT_COMMENT_DESC);
+        Elements elsDate = column.select(cnf.SELECT_COMMENT_DTE);
         if (elsDate == null || elsDate.isEmpty())
-            throw new NoFoundElementsException(url, "div > noindex > div > div.date");
+            throw new NoFoundElementsException(url, cnf.SELECT_COMMENT_DTE);
         Iterator<String> listAuthor = elementsToText(elsAuthor).iterator();
         Iterator<String> listDesc = elementsToText(elsDesc).iterator();
         Iterator<String> listDate = elementsToText(elsDate).iterator();
         while (listAuthor.hasNext() && listDate.hasNext() && listDesc.hasNext()) {
-            comments.add(createComment(listAuthor.next(), "", listDesc.next(), listDate.next(), SITE));
+            comments.add(createComment(listAuthor.next(), "", listDesc.next(), listDate.next(), cnf.SITE));
         }
         return comments;
     }
@@ -167,19 +162,19 @@ public class SearchLabirintJSOUP extends AbstractSearch {
         Document document;
         document = getDoc(url);
         LinkedList<String> books = new LinkedList<>();
-        Elements els = document.select("#rubric-tab > div.b-search-page-content > div > div.products-row-outer.responsive-cards > div > div > div > div.product-cover > a");
+        Elements els = document.select(cnf.SELECT_ITEMS);
         if (els == null || els.isEmpty()) {
             return books;
         }
         String id = els.get(0).attr("href");
-        urlMainBook = SITE + id;
-        urlImg = String.format(URL_IMG_FORM, id.substring(7));
+        urlMainBook = cnf.SITE + id;
+        urlImg = String.format(cnf.URL_IMG_FORM, id.substring(7));
         for (Element e :
                 els) {
             String path = e.attr("href");
             if (path.contains("books")) {
                 id = path.substring(6, path.length()-1);
-                books.add(String.format("%s%s%s", REVIEWS_COMMENTS, id, "/?onpage=100"));
+                books.add(String.format("%s%s%s", cnf.REVIEWS_COMMENTS, id, "/?onpage=100"));
             }
         }
         return books;

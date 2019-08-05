@@ -59,9 +59,12 @@ public class ManagerSearch {
                 List<Comment> comments = null;
                 try {
                     comments = s.loadComments(n);
-                    if (!comments.isEmpty())
-                    result.addAll(comments);
-                    log.info(String.format("%s gave %d comments", s.getTypeResource(), comments.size()));
+                    if (!comments.isEmpty()) {
+                        result.addAll(comments);
+                        log.info(String.format("%s gave %d comments", s.getTypeResource(), comments.size()));
+                    } else {
+                        deleted.add(s);
+                    }
                 } catch (RobotException e) {
                     deleted.add(s);
                     log.info(s.getTypeResource() + " is close\n" + e.getSrcForRobot());

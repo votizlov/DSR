@@ -1,6 +1,7 @@
 package ru.org.dsr.search;
 
 import org.jsoup.nodes.Document;
+import ru.org.dsr.config.ConfigAbstractSearch;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
@@ -11,15 +12,9 @@ import java.util.Scanner;
 
 public abstract class AbstractSearch implements Search {
 
-    protected final String SEARCH;
-    protected final String SITE;
-    protected final TypeResource TYPE_RESOURCE;
+    protected ConfigAbstractSearch cnf;
 
-    AbstractSearch(String search, String site, TypeResource typeResource) {
-        SEARCH = search;
-        SITE = site;
-        this.TYPE_RESOURCE = typeResource;
-    }
+    AbstractSearch() {}
 
     protected String buildUrlSearch(ItemID itemID) {
         String lastName = itemID.getLastName();
@@ -39,19 +34,23 @@ public abstract class AbstractSearch implements Search {
                 }
             }
         }
-        return SEARCH+stringBuilder.toString();
+        return cnf.SEARCH+stringBuilder.toString();
     }
 
     protected Document getDoc(String urlBook) throws RequestException, RobotException {
         try {
-            return getDocument(urlBook, TYPE_RESOURCE);
+            return connect(urlBook, cnf.TYPE_RESOURCE);
         } catch (IOException e) {
             throw new RequestException(urlBook, "get");
         }
     }
 
+    protected void initConfig(ConfigAbstractSearch cnf) {
+        this.cnf = cnf;
+    }
+
     @Override
     public TypeResource getTypeResource() {
-        return TYPE_RESOURCE;
+        return cnf.TYPE_RESOURCE;
     }
 }

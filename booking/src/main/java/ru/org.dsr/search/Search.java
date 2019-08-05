@@ -23,7 +23,7 @@ public interface Search {
 
      TypeResource getTypeResource();
 
-     default Document getDocument(String url, TypeResource type) throws IOException, RobotException {
+     default Document connect(String url, TypeResource type) throws IOException, RobotException {
           Document doc = Jsoup.connect(url)
                   .userAgent(USER_AGENT)
                   .get();

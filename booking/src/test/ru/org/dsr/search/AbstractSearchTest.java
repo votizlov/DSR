@@ -18,19 +18,19 @@ class AbstractSearchTest {
     @org.junit.jupiter.api.Test
     void buildUrlSearchLiveLib() {
         search = new SearchLiveLibJSOUP();
-        Assert.assertEquals(search.SEARCH + "Some+item+search", search.buildUrlSearch(itemID));
+        Assert.assertEquals(search.cnf.SEARCH + "Some+item+search", search.buildUrlSearch(itemID));
     }
 
     @org.junit.jupiter.api.Test
     void buildUrlSearchKinopoisk() {
         search = new SearchKinopoiskJSOUP();
-        Assert.assertEquals(search.SEARCH + "Some+item+search", search.buildUrlSearch(itemID));
+        Assert.assertEquals(search.cnf.SEARCH + "Some+item+search", search.buildUrlSearch(itemID));
     }
 
     @org.junit.jupiter.api.Test
     void buildUrlSearchLabirint() {
         search = new SearchLabirintJSOUP();
-        Assert.assertEquals(search.SEARCH + "Some+item+search", search.buildUrlSearch(itemID));
+        Assert.assertEquals(search.cnf.SEARCH + "Some+item+search", search.buildUrlSearch(itemID));
     }
 
     @org.junit.jupiter.api.Test
