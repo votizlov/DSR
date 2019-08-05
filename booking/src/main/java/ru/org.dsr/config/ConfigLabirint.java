@@ -17,7 +17,6 @@ public class ConfigLabirint extends ConfigAbstractSearch {
     public final String SELECT_ITEMS = "#rubric-tab > div.b-search-page-content > div > div.products-row-outer.responsive-cards > div > div > div > div.product-cover > a";
 
     public final String REVIEWS_COMMENTS = "https://www.labirint.ru/reviews/goods";
-
     public final String URL_IMG_FORM = "https://img2.labirint.ru/books45/%scovermid.jpg";
 
     public ConfigLabirint() {

@@ -27,7 +27,7 @@ public class SearchReadCityJSOUP implements Search {
     private final String SITE = "https://www.chitai-gorod.ru";
     private final String SEARCH = "https://www.chitai-gorod.ru/search.php";
     private final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; rv:40.0) Gecko/20100101 Firefox/40.0 Chrome/74.0.3729.169 Safari/537.36";
-    private final int MAX_COUNT_BOOKS = 50;
+    private final int MAX_COUNT_BOOKS = 3;
     private final JSONObject JSON_MAIN_BOOK;
 
     private Queue<JSONObject> books;

@@ -27,11 +27,8 @@ public class SearchKinopoiskJSOUP extends AbstractSearch{
         initConfig(cnf);
         String url = buildUrlSearch(itemID);
         Document document = getDoc(url);
-        try {
-            movieID = getUrlsItem(document);
-        } catch (NoFoundElementsException e) {
-            log.warn(e);
-        }
+        movieID = getUrlsItem(document);
+        empty = movieID == null;
         URL_MAIN_ITEM = String.format("%s%s",cnf.SITE, movieID);
         this.itemID = itemID;
     }
@@ -48,7 +45,7 @@ public class SearchKinopoiskJSOUP extends AbstractSearch{
     }
 
     @Override
-    public List<Comment> loadComments(int count) throws RobotException {
+    public List<Comment> loadComments(int count) throws RobotException, RequestException {
         LinkedList<Comment> comments = new LinkedList<>();
         if (temp != null)
             while (!temp.isEmpty() && count > 0) {
@@ -71,15 +68,10 @@ public class SearchKinopoiskJSOUP extends AbstractSearch{
         return empty && (temp == null || temp.isEmpty());
     }
 
-    private Queue<Comment> getComments (String urlBook) throws RobotException {
+    private Queue<Comment> getComments (String urlBook) throws RobotException, RequestException {
         LinkedList<Comment> comments = new LinkedList<>();
         Document docItem;
-        try {
-            docItem = getDoc(urlBook);
-        } catch (RequestException e) {
-            log.info(e+"\nDidn't comments find?");
-            return comments;
-        }
+        docItem = getDoc(urlBook);
 
         Elements elementsOfComments = docItem.select(cnf.SELECT_COMMENTS);
         for (Element e : elementsOfComments) {
@@ -185,13 +177,13 @@ public class SearchKinopoiskJSOUP extends AbstractSearch{
         return urlImg;
     }
 
-    private String getUrlsItem(Document pages) throws NoFoundElementsException {
+    private String getUrlsItem(Document pages) {
         String result;
         Elements els = pages.select(cnf.SELECT_ITEMS);
         if (els.size() != 1) {
             els = pages.select(cnf.SELECT_ITEMS);
-            if (els.size() != 1)
-                throw new NoFoundElementsException(cnf.SEARCH, "only one : "+cnf.SELECT_ITEMS);
+            if (els == null || els.size() == 0)
+                return null;
         }
         result = els.get(0).attr("data-url");
         return result;

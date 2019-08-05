@@ -103,7 +103,7 @@ public class SearchLiveLibJSOUP extends AbstractSearch {
     private Item initBook() throws RequestException, RobotException {
         Document pageBook = getDoc(URL_MAIN_BOOK);
 
-        String desc = null, name, author, urlImg;
+        String desc = null, firstName, lastName, urlImg;
 
         try {
             desc = getDescriptionItem(pageBook);
@@ -114,23 +114,23 @@ public class SearchLiveLibJSOUP extends AbstractSearch {
         }
 
         try {
-            name = getFirstNameBook(pageBook);
+            firstName = getFirstNameBook(pageBook);
         } catch (LoadedEmptyBlocksException e) {
             log.warn(e.toString());
-            name = itemID.getLastName();
+            firstName = itemID.getLastName();
         } catch (NoFoundElementsException e) {
             log.warn(e.toString());
-            name = itemID.getLastName();
+            firstName = itemID.getLastName();
         }
 
         try {
-            author = getNameAuthor(pageBook);
+            lastName = getNameAuthor(pageBook);
         } catch (LoadedEmptyBlocksException e) {
             log.warn(e.toString());
-            author = itemID.getFirstName();
+            lastName = itemID.getFirstName();
         } catch (NoFoundElementsException e) {
             log.warn(e.toString());
-            author = itemID.getFirstName();
+            lastName = itemID.getFirstName();
         }
 
         try {
@@ -142,7 +142,7 @@ public class SearchLiveLibJSOUP extends AbstractSearch {
             log.warn(e.toString());
             urlImg = "";
         }
-        return new Item(new ItemID(author, name, this.itemID.getType()), desc, urlImg);
+        return new Item(new ItemID(firstName, lastName, this.itemID.getType()), desc, urlImg);
     }
 
     private String getDescriptionItem(Document pageBook) throws NoFoundElementsException, LoadedEmptyBlocksException {

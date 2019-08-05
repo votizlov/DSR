@@ -9,16 +9,15 @@ import ru.org.dsr.domain.FullItem;
 import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.domain.Comment;
-import ru.org.dsr.exception.RobotException;
-import ru.org.dsr.search.SearchKinopoiskJSOUP;
 import ru.org.dsr.services.CacheFullItemService;
 import ru.org.dsr.services.ManagerSearch;
 
 import java.util.List;
 
+@RestController
 public class ContentController {
 
-    private static final Logger log = Logger.getLogger(SearchKinopoiskJSOUP.class);
+    private static final Logger log = Logger.getLogger(ContentController.class);
 
     @Autowired
     CacheFullItemService service;
@@ -34,7 +33,7 @@ public class ContentController {
 
     @GetMapping("/content")
     public ModelAndView toContent() {
-        return new ModelAndView("result");
+        return new ModelAndView("content");
     }
 
     @ResponseBody
@@ -52,17 +51,26 @@ public class ContentController {
     @ResponseBody
     @PutMapping(value = "/cache/save")
     public long saveFullItem(@RequestBody ItemID itemID) {
+        {
+            Item DBItem = service.getItemByItemID(itemID);
+            if (DBItem != null) {
+                return DBItem.getId();
+            }
+        }
         log.info("Start save item");
         log.info("Start manager initialization");
-        try {
-            manager.init(itemID);
-        } catch (RobotException e) {
-            log.warn(e.getSrcForRobot(), e);
-            return -1;
-        }
+        manager.init(itemID);
         log.info("Close  manager initialization");
+        if (manager.isEmpty()) return -1;
+        Item nowItem = manager.getItem();
+        {
+            Item DBItem = service.getItemByItemID(nowItem.getItemID());
+            if (DBItem != null) {
+                return DBItem.getId();
+            }
+        }
         FullItem fullItem = new FullItem();
-        fullItem.setItem(manager.getItem());
+        fullItem.setItem(nowItem);
         fullItem.setComments(manager.getComments(50));
         long id = service.save(fullItem);
         log.info("Close save item");

@@ -32,66 +32,40 @@ public class FactoryPackSearch {
         TypeItem typeItem = itemID.getType();
         LinkedList<Search> searches = new LinkedList<>();
         Search mainSearch = null;
+        TypeResource main = null;
         switch (typeItem) {
-            case BOOK: {
-                TypeResource main = mainSearchBook;
-                for (TypeResource type :
-                        data.get(TypeItem.BOOK)) {
-                    try {
-                        if (type == main) {
-                            mainSearch = createSearch(type, itemID);
-                            searches.add(mainSearch);
-                        } else {
-                            searches.add(createSearch(type, itemID));
-                        }
-                        log.info(String.format("%s%s", type, " connected"));
-                    } catch (RobotException e) {
-                        log.info(String.format("%s%s%s", type, " is close\n", e.toString()));
-                    } catch (RequestException | JSONImproperHandling e) {
-                        log.fatal("", e);
-                    }
-                }
+            case GAME:
+                main = mainSearchGame;
                 break;
-            }
-            case MOVIE: {
-                TypeResource main = mainSearchMovie;
-                for (TypeResource type :
-                        data.get(TypeItem.MOVIE)) {
-                    try {
-                        if (type == main) {
-                            mainSearch = createSearch(type, itemID);
-                            searches.add(mainSearch);
-                        } else {
-                            searches.add(createSearch(type, itemID));
-                        }
-                        log.info(String.format("%s%s", type, " connected"));
-                    } catch (RobotException e) {
-                        log.info(String.format("%s%s%s", type, " is close\n", e.getSrcForRobot()));
-                    } catch (RequestException | JSONImproperHandling e) {
-                        log.fatal("", e);
-                    }
-                }
+            case MOVIE:
+                main = mainSearchMovie;
                 break;
-            }
-            case GAME: {
-                TypeResource main = mainSearchGame;
-                for (TypeResource type :
-                        data.get(TypeItem.GAME)) {
-                    try {
-                        if (type == main) {
-                            mainSearch = createSearch(type, itemID);
-                            searches.add(mainSearch);
-                        } else {
-                            searches.add(createSearch(type, itemID));
-                        }
-                        log.info(String.format("%s%s", type, " connected"));
-                    } catch (RobotException e) {
-                        log.info(String.format("%s%s%s", type, " is close\n", e.getSrcForRobot()));
-                    } catch (RequestException | JSONImproperHandling e) {
-                        log.fatal("", e);
-                    }
-                }
+            case BOOK:
+                main = mainSearchBook;
                 break;
+        }
+        boolean emptyMain = false;
+        for (TypeResource type :
+                data.get(typeItem)) {
+            try {
+                Search search = createSearch(type, itemID);
+                assert search != null;
+                if (search.isEmpty()) {
+                    emptyMain = main == type;
+                    log.info(String.format("%s%s", type, " did not find"));
+                } else {
+                    if (type == main || emptyMain) {
+                        mainSearch = search;
+                        searches.add(search);
+                    } else {
+                        searches.add(search);
+                    }
+                    log.info(String.format("%s%s", type, " connected"));
+                }
+            } catch (RobotException e) {
+                log.info(String.format("%s%s%s", type, " is close\n", e.toString()));
+            } catch (RequestException | JSONImproperHandling e) {
+                log.fatal("", e);
             }
         }
         return new PackSearch(searches, mainSearch);

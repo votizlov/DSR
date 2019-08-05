@@ -26,8 +26,7 @@ class SearchLabirintJSOUPTest {
                 search = new SearchLabirintJSOUP(itemID);
                 Item item = search.getItem();
                 Assert.assertNotNull(item);
-                Assert.assertTrue(item != null &&
-                        item.getItemID()!=null &&
+                Assert.assertTrue(item.getItemID()!=null &&
                         item.getItemID().getFirstName() != null &&
                         item.getItemID().getLastName() != null &&
                         item.getDesc() != null &&

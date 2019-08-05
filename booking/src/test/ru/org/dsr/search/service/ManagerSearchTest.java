@@ -37,11 +37,7 @@ class ManagerSearchTest {
     void getCommentsBook() {
         managerSearch = new ManagerSearch(configFactory);
         ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.BOOK);
-        try {
-            managerSearch.init(itemID);
-        } catch (RobotException e) {
-            e.printStackTrace();
-        }
+        managerSearch.init(itemID);
         List<Comment> comments = managerSearch.getComments(100);
         Assert.assertTrue((100 == comments.size() || managerSearch.isEmpty()) && 100 >= comments.size());
     }
@@ -50,11 +46,7 @@ class ManagerSearchTest {
     void getItemBook() {
         managerSearch = new ManagerSearch(configFactory);
         ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.BOOK);
-        try {
-            managerSearch.init(itemID);
-        } catch (RobotException e) {
-            e.printStackTrace();
-        }
+        managerSearch.init(itemID);
         Item item = managerSearch.getItem();
         Assert.assertTrue(item != null &&
                 item.getItemID()!=null &&
@@ -68,11 +60,7 @@ class ManagerSearchTest {
     void getCommentsMovie() {
         managerSearch = new ManagerSearch(configFactory);
         ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.MOVIE);
-        try {
-            managerSearch.init(itemID);
-        } catch (RobotException e) {
-            e.printStackTrace();
-        }
+        managerSearch.init(itemID);
         List<Comment> comments = managerSearch.getComments(100);
         Assert.assertTrue((100 == comments.size() || managerSearch.isEmpty()) && 100 >= comments.size());
     }
@@ -81,11 +69,7 @@ class ManagerSearchTest {
     void getItemMovie() {
         managerSearch = new ManagerSearch(configFactory);
         ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.MOVIE);
-        try {
-            managerSearch.init(itemID);
-        } catch (RobotException e) {
-            e.printStackTrace();
-        }
+        managerSearch.init(itemID);
         Item item = managerSearch.getItem();
         Assert.assertTrue(item != null &&
                 item.getItemID()!=null &&

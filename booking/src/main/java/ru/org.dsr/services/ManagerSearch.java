@@ -35,14 +35,11 @@ public class ManagerSearch {
         this.configFactory = configFactory;
     }
 
-    public void init(ItemID itemID) throws RobotException {
+    public void init(ItemID itemID) {
         factory = new FactoryPackSearch(configFactory);
         PackSearch packSearch = factory.createPackSearch(itemID);
         sites = packSearch.getSearches();
         mainSearch = packSearch.getMainSearch();
-        if (sites.isEmpty()) {
-            throw new RobotException("all resource is close");
-        }
     }
 
     public List<Comment> getComments(int count) {
