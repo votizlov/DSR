@@ -22,7 +22,11 @@ public class CommentService {
     }
 
     public void deleteByIdItem(long idItem) {
-        repos.deleteByIdItem(idItem);
+        List<Comment> list = repos.findByIdItem(idItem);
+        for (Comment c :
+                list) {
+            repos.deleteById(c.getId());
+        }
     }
 
 }

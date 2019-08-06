@@ -5,7 +5,6 @@ import ru.org.dsr.config.ConfigFactory;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.domain.PackSearch;
 import ru.org.dsr.exception.JSONImproperHandling;
-import ru.org.dsr.exception.PropertiesException;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
 import ru.org.dsr.search.*;
@@ -18,13 +17,11 @@ public class FactoryPackSearch {
     private static final Logger log = Logger.getLogger(FactoryPackSearch.class);
     private TypeResource mainSearchBook;
     private TypeResource mainSearchMovie;
-    private TypeResource mainSearchGame;
     private HashMap<TypeItem, List<TypeResource>> data;
 
     public FactoryPackSearch(ConfigFactory configFactory) {
         mainSearchBook = configFactory.getMainBook();
         mainSearchMovie = configFactory.getMainMovie();
-        mainSearchGame = configFactory.getMainGame();
         data = configFactory.getData();
     }
 
@@ -34,9 +31,6 @@ public class FactoryPackSearch {
         Search mainSearch = null;
         TypeResource main = null;
         switch (typeItem) {
-            case GAME:
-                main = mainSearchGame;
-                break;
             case MOVIE:
                 main = mainSearchMovie;
                 break;
@@ -63,7 +57,8 @@ public class FactoryPackSearch {
                     log.info(String.format("%s%s", type, " connected"));
                 }
             } catch (RobotException e) {
-                log.info(String.format("%s%s%s", type, " is close\n", e.toString()));
+                emptyMain = type == main;
+                log.info(String.format("%s%s", type, " is close"));
             } catch (RequestException | JSONImproperHandling e) {
                 log.fatal("", e);
             }
@@ -81,6 +76,8 @@ public class FactoryPackSearch {
                 return new SearchLabirintJSOUP(itemID);
             case KINOPOISK:
                 return new SearchKinopoiskJSOUP(itemID);
+            case IVI:
+                return new SearchIviJSOUP(itemID);
         }
         return null;
     }

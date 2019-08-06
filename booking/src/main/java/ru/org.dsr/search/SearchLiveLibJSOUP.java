@@ -12,18 +12,18 @@ import ru.org.dsr.exception.LoadedEmptyBlocksException;
 import ru.org.dsr.exception.NoFoundElementsException;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
+import ru.org.dsr.search.factory.TypeItem;
 
 import java.util.*;
 
 public class SearchLiveLibJSOUP extends AbstractSearch {
-    private static final Logger log = Logger.getLogger(SearchLiveLibJSOUP.class);
+    private static final Logger LOGGER = Logger.getLogger(SearchLiveLibJSOUP.class);
     private final String URL_MAIN_BOOK;
 
     private ConfigLiveLib cnf = new ConfigLiveLib();
 
     private Queue<String> books;
     private Queue<Comment> temp;
-    private ItemID itemID;
     private int currentPage = 1;
 
     public SearchLiveLibJSOUP(ItemID itemID) throws RequestException, RobotException {
@@ -34,11 +34,11 @@ public class SearchLiveLibJSOUP extends AbstractSearch {
         String urlSearch = buildUrlSearch(itemID);
         Document pageSearch = getDoc(urlSearch);
 
-        books = getUrlsItem(pageSearch);
-        URL_MAIN_BOOK = books.peek();
-        this.itemID = itemID;
+        books = getAttrsUnchecked(pageSearch, cnf.SELECT_ITEMS, "href");
+        URL_MAIN_BOOK = cnf.SITE + books.peek();
     }
 
+    //for test
     SearchLiveLibJSOUP() {
         initConfig(cnf);
         URL_MAIN_BOOK = null;
@@ -58,7 +58,7 @@ public class SearchLiveLibJSOUP extends AbstractSearch {
                 count--;
             }
         for(;count > 0 && !books.isEmpty();) {
-            temp = getComments(String.format(cnf.FORM_URL_PAGE_COMMENTS, books.peek(), currentPage));
+            temp = getComments(String.format(cnf.FORM_URL_PAGE_COMMENTS, cnf.SITE, books.peek(), currentPage));
             if (temp.isEmpty()) {
                 currentPage = 1;
                 books.poll();
@@ -83,124 +83,66 @@ public class SearchLiveLibJSOUP extends AbstractSearch {
         LinkedList<Comment> comments = new LinkedList<>();
         Document docBook;
         docBook = getDoc(urlBook);
-        Elements elementsOfComments = docBook.select(cnf.SELECT_COMMENTS); //block comments
+        Elements elementsOfComments = docBook.select(cnf.SELECT_COMMENTS);
         for (Element e : elementsOfComments) {
-            comments.add(initComment(e));
+            comments.add(initComment(e, urlBook));
         }
         return comments;
     }
 
-    private LinkedList<String> getUrlsItem(Document pageBooks) {
-        LinkedList<String> result = new LinkedList<>();
-        Elements els = pageBooks.select(cnf.SELECT_ITEMS);
-        for (Element e :
-                els) {
-            result.addLast(cnf.SITE + e.attr("href"));
-        }
-        return result;
-    }
-
     private Item initBook() throws RequestException, RobotException {
-        Document pageBook = getDoc(URL_MAIN_BOOK);
-
-        String desc = null, firstName, lastName, urlImg;
+        Item item = new Item();
+        Document doc = getDoc(URL_MAIN_BOOK);
 
         try {
-            desc = getDescriptionItem(pageBook);
-        } catch (LoadedEmptyBlocksException e) {
-            log.warn(e.toString());
-        } catch (NoFoundElementsException e) {
-            log.warn(e.toString());
+            item.setDesc(getText(doc, cnf.SELECT_ITEM_DESC, URL_MAIN_BOOK));
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
 
         try {
-            firstName = getFirstNameBook(pageBook);
-        } catch (LoadedEmptyBlocksException e) {
-            log.warn(e.toString());
-            firstName = itemID.getLastName();
-        } catch (NoFoundElementsException e) {
-            log.warn(e.toString());
-            firstName = itemID.getLastName();
+            item.setFirstName(getText(doc, cnf.SELECT_ITEM_FIRST_NAME, URL_MAIN_BOOK));
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
 
         try {
-            lastName = getNameAuthor(pageBook);
-        } catch (LoadedEmptyBlocksException e) {
-            log.warn(e.toString());
-            lastName = itemID.getFirstName();
-        } catch (NoFoundElementsException e) {
-            log.warn(e.toString());
-            lastName = itemID.getFirstName();
+            item.setLastName(getText(doc, cnf.SELECT_ITEM_LAST_NAME, URL_MAIN_BOOK));
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
 
         try {
-            urlImg = getUrlImg(pageBook);
-        } catch (LoadedEmptyBlocksException e) {
-            log.warn(e.toString());
-            urlImg = "";
-        } catch (NoFoundElementsException e) {
-            log.warn(e.toString());
-            urlImg = "";
+            item.setUrlImg(getAttr(doc, cnf.SELECT_ITEM_URL_IMAGE, "src", URL_MAIN_BOOK));
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
-        return new Item(new ItemID(firstName, lastName, this.itemID.getType()), desc, urlImg);
+        item.setType(TypeItem.BOOK);
+
+        return item;
     }
 
-    private String getDescriptionItem(Document pageBook) throws NoFoundElementsException, LoadedEmptyBlocksException {
-        Elements elements = pageBook.select(cnf.SELECT_ITEM_DESC);
-        if (elements == null || elements.size() == 0) {
-            throw new NoFoundElementsException(URL_MAIN_BOOK, cnf.SELECT_ITEM_DESC);
-        }
-        String text = elements.get(0).text();
-        if (text == null) {
-            throw new LoadedEmptyBlocksException(URL_MAIN_BOOK, cnf.SELECT_ITEM_DESC, "#text");
-        }
-        return text;
-    }
+    private Comment initComment(Element element, String url) {
+        String title, author, desc, date;
+        author = desc = date = null;
 
-    private String getFirstNameBook(Document pageBook) throws NoFoundElementsException, LoadedEmptyBlocksException {
-        Elements elsName = pageBook.select(cnf.SELECT_ITEM_FIRST_NAME);
-        if (elsName == null || elsName.size() == 0) {
-            elsName = pageBook.select(cnf.SELECT_ITEM_FIRST_NAME);
-        }
-        if (elsName == null || elsName.size() == 0) {
-            throw new NoFoundElementsException(URL_MAIN_BOOK, cnf.SELECT_ITEM_FIRST_NAME);
-        }
-        String name = elsName.get(0).text();
-        if (name == null || name.equals("")) {
-            throw new LoadedEmptyBlocksException(URL_MAIN_BOOK, cnf.SELECT_ITEM_FIRST_NAME, "#text");
-        }
-        return name;
-    }
+        title = getTextUnchecked(element, cnf.SELECT_COMMENT_TITLE);
 
-    private String getNameAuthor(Document pageBook) throws NoFoundElementsException, LoadedEmptyBlocksException {
-        Elements elsName = pageBook.select(cnf.SELECT_ITEM_LAST_NAME);
-        if (elsName == null || elsName.size() == 0) {
-            throw new NoFoundElementsException(URL_MAIN_BOOK, cnf.SELECT_ITEM_LAST_NAME);
+        try {
+            author = getText(element, cnf.SELECT_COMMENT_AUTHOR, url);
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
-        String name = elsName.get(0).text();
-        if (name == null || name.equals("")) {
-            throw new LoadedEmptyBlocksException(URL_MAIN_BOOK, cnf.SELECT_ITEM_LAST_NAME, "#text");
+        try {
+            desc = getText(element, cnf.SELECT_COMMENT_DESC, url);
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
-        return name;
-    }
-
-    private String getUrlImg(Document pageBook) throws NoFoundElementsException, LoadedEmptyBlocksException {
-        Elements elsName = pageBook.select(cnf.SELECT_ITEM_URL_IMAGE);
-        if (elsName == null || elsName.size() == 0) {
-            throw new NoFoundElementsException(URL_MAIN_BOOK, cnf.SELECT_ITEM_URL_IMAGE);
+        try {
+            date = getText(element, cnf.SELECT_COMMENT_DTE, url);
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
-        String url = elsName.get(0).attr("src");
-        if (url == null || url.equals("")) {
-            throw new LoadedEmptyBlocksException(URL_MAIN_BOOK, cnf.SELECT_ITEM_URL_IMAGE, "#src");
-        }
-        return url;
-    }
-
-    private Comment initComment(Element e) {
-        String title = e.select(cnf.SELECT_COMMENT_TITLE).text().replace('\"', '\'');
-        String desc = e.select(cnf.SELECT_COMMENT_DESC).text().replace('\"', '\'');
-        String date = e.select(cnf.SELECT_COMMENT_DTE).text().replace('\"', '\'');
-        String author = e.select(cnf.SELECT_COMMENT_AUTHOR).text().replace('\"', '\'');
-        return createComment(author, title, desc, date, cnf.SITE);
+        return new Comment(cnf.SITE, author, title, desc, date);
     }
 }

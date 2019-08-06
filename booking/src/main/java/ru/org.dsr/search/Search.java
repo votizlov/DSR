@@ -14,7 +14,6 @@ import java.util.List;
 public interface Search {
      String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; rv:40.0) Gecko/20100101 Firefox/40.0 Chrome/74.0.3729.169 Safari/537.36";
 
-
      Item getItem() throws RequestException, RobotException;
 
      List<Comment> loadComments(int count) throws RobotException, RequestException;
@@ -47,6 +46,9 @@ public interface Search {
                   if (doc.getElementsByClass("image form__captcha").size() != 0)
                       throw new RobotException(doc);
                   break;
+              }
+              case IVI: {
+
               }
           }
 

@@ -14,29 +14,36 @@ import ru.org.dsr.search.factory.TypeItem;
 import java.util.*;
 
 public class SearchKinopoiskJSOUP extends AbstractSearch{
-    private static final Logger log = Logger.getLogger(SearchKinopoiskJSOUP.class);
+    private static final Logger LOGGER = Logger.getLogger(SearchKinopoiskJSOUP.class);
     private ConfigKinopoisk cnf = new ConfigKinopoisk();
 
-    private final String URL_MAIN_ITEM;
-    private boolean empty = false;
+    private final String URL_ITEM;
+    private final String URL_COMMENTS;
+    private boolean empty;
     private String movieID;
     private Queue<Comment> temp;
-    private ItemID itemID;
 
     public SearchKinopoiskJSOUP(ItemID itemID) throws RobotException, RequestException {
         initConfig(cnf);
         String url = buildUrlSearch(itemID);
         Document document = getDoc(url);
-        movieID = getUrlsItem(document);
+        movieID = getAttrUnchecked(document, cnf.SELECT_ITEMS, "data-url");
         empty = movieID == null;
-        URL_MAIN_ITEM = String.format("%s%s",cnf.SITE, movieID);
-        this.itemID = itemID;
+        if (!empty) {
+            URL_ITEM = String.format("%s%s", cnf.SITE, movieID);
+            URL_COMMENTS = String.format(cnf.FORM_URL_PAGE_COMMENTS, movieID, 1);
+        } else {
+            URL_COMMENTS = null;
+            URL_ITEM = null;
+        }
     }
 
-    SearchKinopoiskJSOUP() {
+    //for test
+    public SearchKinopoiskJSOUP() {
         initConfig(cnf);
-        URL_MAIN_ITEM = null;
+        URL_ITEM = null;
         empty = true;
+        URL_COMMENTS = null;
     }
 
     @Override
@@ -52,7 +59,7 @@ public class SearchKinopoiskJSOUP extends AbstractSearch{
                 comments.add(temp.poll());
                 count--;
             }
-        if (count>0 && !empty) {
+        if (!empty) {
             temp = getComments(String.format(cnf.FORM_URL_PAGE_COMMENTS, movieID, 1));
             int i;
             for (i = 0; i < count && !temp.isEmpty(); i++) {
@@ -80,112 +87,60 @@ public class SearchKinopoiskJSOUP extends AbstractSearch{
         return comments;
     }
 
-    private Comment initComment(Element e) {
-        String title = e.select(cnf.SELECT_COMMENT_TITLE).text().replace('\"', '\'');
-        String desc = e.select(cnf.SELECT_COMMENT_DESC).text().replace('\"', '\'');
-        String date = e.select(cnf.SELECT_COMMENT_DTE).text().replace('\"', '\'');
-        String author = e.select(cnf.SELECT_COMMENT_AUTHOR).text().replace('\"', '\'');
-        return createComment(author, title, desc, date, cnf.SITE);
+    private Comment initComment(Element element) {
+        String title, author, desc, date;
+        author = desc = date = null;
+
+        title = getTextUnchecked(element, cnf.SELECT_COMMENT_TITLE);
+        title = title == null ? "" : title;
+
+        try {
+            author = getText(element, cnf.SELECT_COMMENT_AUTHOR, URL_COMMENTS);
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
+        }
+        try {
+            desc = getText(element, cnf.SELECT_COMMENT_DESC, URL_COMMENTS);
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
+        }
+        try {
+            date = getText(element, cnf.SELECT_COMMENT_DTE, URL_COMMENTS);
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
+        }
+        return new Comment(cnf.SITE, author, title, desc, date);
     }
 
     private Item initBook() throws RequestException, RobotException {
-        Document pageBook = getDoc(URL_MAIN_ITEM);
-
-        String desc = null, firstName, lastName, urlImg;
+        Item item = new Item();
+        Document doc = getDoc(URL_ITEM);
 
         try {
-            desc = getDesc(pageBook);
-        } catch (LoadedEmptyBlocksException e) {
-            log.warn(e.toString());
-        } catch (NoFoundElementsException e) {
-            log.warn(e.toString());
+            item.setDesc(getText(doc, cnf.SELECT_ITEM_DESC, URL_ITEM));
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
 
         try {
-            firstName = getFirstName(pageBook);
-        } catch (LoadedEmptyBlocksException e) {
-            log.warn(e.toString());
-            firstName = itemID.getFirstName();
-        } catch (NoFoundElementsException e) {
-            log.warn(e.toString());
-            firstName = itemID.getFirstName();
+            item.setFirstName(getText(doc, cnf.SELECT_ITEM_FIRST_NAME, URL_ITEM));
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
 
         try {
-            lastName = getLastName(pageBook);
-        } catch (LoadedEmptyBlocksException e) {
-            log.warn(e.toString());
-            lastName = itemID.getLastName();
-        } catch (NoFoundElementsException e) {
-            log.warn(e.toString());
-            lastName = itemID.getLastName();
+            item.setLastName(getText(doc, cnf.SELECT_ITEM_LAST_NAME, URL_ITEM));
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
 
         try {
-            urlImg = getUrlImg(pageBook);
-        } catch (LoadedEmptyBlocksException e) {
-            log.warn(e.toString());
-            urlImg = "";
-        } catch (NoFoundElementsException e) {
-            log.warn(e.toString());
-            urlImg = "";
+            item.setUrlImg(getAttr(doc, cnf.SELECT_ITEM_URL_IMAGE, "src", URL_ITEM));
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
-        return new Item(new ItemID(firstName, lastName, TypeItem.MOVIE), desc, urlImg);
-    }
+        item.setType(TypeItem.MOVIE);
 
-    private String getFirstName(Document document) throws NoFoundElementsException, LoadedEmptyBlocksException {
-        Elements elsFirstName = document.select(cnf.SELECT_ITEM_FIRST_NAME);
-        if (elsFirstName == null || elsFirstName.isEmpty()) {
-            throw new NoFoundElementsException(URL_MAIN_ITEM, cnf.SELECT_ITEM_FIRST_NAME);
-        }
-        String firstName = elsFirstName.get(0).text();
-        if (firstName == null || firstName.isEmpty())
-            throw new LoadedEmptyBlocksException("#text", cnf.SELECT_ITEM_FIRST_NAME, URL_MAIN_ITEM);
-        return firstName;
-    }
-
-    private String getLastName(Document document) throws NoFoundElementsException, LoadedEmptyBlocksException {
-        Elements elsLastName = document.select(cnf.SELECT_ITEM_LAST_NAME);
-        if (elsLastName == null || elsLastName.isEmpty()) {
-            throw new NoFoundElementsException(URL_MAIN_ITEM, cnf.SELECT_ITEM_LAST_NAME);
-        }
-        String lastName = elsLastName.text();
-        if (lastName == null || lastName.isEmpty())
-            throw new LoadedEmptyBlocksException("#text", cnf.SELECT_ITEM_LAST_NAME, URL_MAIN_ITEM);
-        return lastName;
-    }
-
-    private String getDesc(Document document) throws NoFoundElementsException, LoadedEmptyBlocksException {
-        Elements elsDesc = document.select(cnf.SELECT_ITEM_DESC);
-        if (elsDesc == null || elsDesc.isEmpty()) {
-            throw new NoFoundElementsException(URL_MAIN_ITEM, cnf.SELECT_ITEM_DESC);
-        }
-        String desc = elsDesc.get(0).text();
-        if (desc == null || desc.isEmpty())
-            throw new LoadedEmptyBlocksException("#text", cnf.SELECT_ITEM_DESC, URL_MAIN_ITEM);
-        return desc;
-    }
-
-    private String getUrlImg(Document document) throws NoFoundElementsException, LoadedEmptyBlocksException {
-        Elements elsDesc = document.select(cnf.SELECT_ITEM_URL_IMAGE);
-        if (elsDesc == null || elsDesc.isEmpty()) {
-            throw new NoFoundElementsException(URL_MAIN_ITEM, cnf.SELECT_ITEM_URL_IMAGE);
-        }
-        String urlImg = elsDesc.get(0).attr("src");
-        if (urlImg == null || urlImg.isEmpty())
-            throw new LoadedEmptyBlocksException("#src", cnf.SELECT_ITEM_URL_IMAGE, URL_MAIN_ITEM);
-        return urlImg;
-    }
-
-    private String getUrlsItem(Document pages) {
-        String result;
-        Elements els = pages.select(cnf.SELECT_ITEMS);
-        if (els.size() != 1) {
-            els = pages.select(cnf.SELECT_ITEMS);
-            if (els == null || els.size() == 0)
-                return null;
-        }
-        result = els.get(0).attr("data-url");
-        return result;
+        return item;
     }
 }

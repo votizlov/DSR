@@ -10,7 +10,7 @@ public class Comment {
     @GeneratedValue
     @Column(name = "Id")
     private long id;
-    @Column(name = "Item_id")
+    @Column(name = "Id_item")
     private long idItem;
     @Column(name = "Site")
     private String site;
@@ -98,5 +98,16 @@ public class Comment {
 
     public void setPage(int page) {
         this.page = page;
+    }
+
+    @Override
+    public String toString() {
+        return "Comment{" +
+                ", site='" + site + '\'' +
+                ", author='" + author + '\'' +
+                ", title='" + title + '\'' +
+                ", desc='" + desc + '\'' +
+                ", date='" + date + '\'' +
+                '}';
     }
 }

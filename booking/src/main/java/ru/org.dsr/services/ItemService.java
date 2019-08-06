@@ -6,6 +6,8 @@ import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.repos.ItemRepos;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -35,6 +37,15 @@ public class ItemService {
 
     public List<Item> getAll() {
         return repos.findAll();
+    }
+
+    public List<Item> removeOldItems(LocalDateTime date) {
+        List<Item> list = repos.findByDateLessThan(date);
+        for (Item i :
+                list) {
+            repos.deleteById(i.getId());
+        }
+        return list;
     }
 
 }

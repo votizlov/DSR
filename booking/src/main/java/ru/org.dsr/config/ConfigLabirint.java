@@ -2,7 +2,7 @@ package ru.org.dsr.config;
 
 import ru.org.dsr.search.factory.TypeResource;
 
-public class ConfigLabirint extends ConfigAbstractSearch {
+public class ConfigLabirint extends AbstractConfigSearch {
     private static final String _SEARCH = "https://www.labirint.ru/search/";
     private static final String _SITE = "https://www.labirint.ru";
     private static final TypeResource _TYPE_RESOURCE = TypeResource.LABIRINT;
@@ -17,7 +17,7 @@ public class ConfigLabirint extends ConfigAbstractSearch {
     public final String SELECT_ITEMS = "#rubric-tab > div.b-search-page-content > div > div.products-row-outer.responsive-cards > div > div > div > div.product-cover > a";
 
     public final String REVIEWS_COMMENTS = "https://www.labirint.ru/reviews/goods";
-    public final String URL_IMG_FORM = "https://img2.labirint.ru/books45/%scovermid.jpg";
+    public final String URL_IMG_FORM = "https://img2.labirint.ru/books45/%sbig.jpg";
 
     public ConfigLabirint() {
         super(_SEARCH, _SITE, _TYPE_RESOURCE);

@@ -7,6 +7,7 @@ import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
+import ru.org.dsr.search.SearchLiveLibJSOUP;
 import ru.org.dsr.search.factory.TypeItem;
 import ru.org.dsr.search.factory.TypeResource;
 
@@ -45,8 +46,8 @@ class SearchLiveLibJSOUPTest {
                 ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.BOOK);
                 search = new SearchLiveLibJSOUP(itemID);
                 List<Comment> comments = search.loadComments(100);
-                int n;
-                Assert.assertTrue((100 == (n = comments.size()) || search.isEmpty()) && 100 >= n && n > 0);
+                int n = comments.size();
+                Assert.assertTrue((100 == n || search.isEmpty()) && 100 >= n);
             } catch (RequestException e) {
                 e.printStackTrace();
             }
@@ -65,7 +66,8 @@ class SearchLiveLibJSOUPTest {
                 int n, part = 10;
                 for (int i = 0; i < part*10; i+=part) {
                     comments.addAll(search.loadComments(part));
-                    Assert.assertTrue((i+10 == (n = comments.size()) || search.isEmpty()) && n > 0);
+                    n = comments.size();
+                    Assert.assertTrue((i+10 == n || search.isEmpty()) && i+10 >= n);
                 }
             } catch (RequestException e) {
                 e.printStackTrace();

@@ -4,7 +4,6 @@ resultApp.controller('stageItem', function($scope, $http) {
 
     $scope.getItem = function () {
         let id = sessionStorage.getItem("id");
-        console.log(id);
         $http.post("/cache/item", id).then(function (response) {
             $scope.item = response.data;
             $("#img_item").css("background-image", 'url('+$scope.item.urlImg+')');

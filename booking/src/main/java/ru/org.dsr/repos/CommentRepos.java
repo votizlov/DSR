@@ -13,5 +13,8 @@ public interface CommentRepos extends JpaRepository<Comment, Long> {
     Comment findById(long id);
 
     List<Comment> findByIdItemAndPage(long idItem, int page);
+
+    List<Comment> findByIdItem(long idItem);
+
     void deleteByIdItem(long idItem);
 }

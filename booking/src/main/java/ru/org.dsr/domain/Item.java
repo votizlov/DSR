@@ -4,7 +4,6 @@ import ru.org.dsr.search.factory.TypeItem;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "Items")
@@ -118,13 +117,11 @@ public class Item {
     @Override
     public String toString() {
         return "Item{" +
-                "id=" + id +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", type=" + type +
                 ", desc='" + desc + '\'' +
                 ", urlImg='" + urlImg + '\'' +
-                ", date=" + date +
                 '}';
     }
 }

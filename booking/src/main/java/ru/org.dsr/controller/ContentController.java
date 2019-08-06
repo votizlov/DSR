@@ -24,13 +24,6 @@ public class ContentController {
     @Autowired
     ManagerSearch manager;
 
-    @ResponseBody
-    @DeleteMapping(value = "/cache/delete")
-    public boolean clearBD() {
-        service.clear();
-        return true;
-    }
-
     @GetMapping("/content")
     public ModelAndView toContent() {
         return new ModelAndView("content");
@@ -63,11 +56,13 @@ public class ContentController {
         log.info("Close  manager initialization");
         if (manager.isEmpty()) return -1;
         Item nowItem = manager.getItem();
-        {
+        if (nowItem != null) {
             Item DBItem = service.getItemByItemID(nowItem.getItemID());
             if (DBItem != null) {
                 return DBItem.getId();
             }
+        } else {
+
         }
         FullItem fullItem = new FullItem();
         fullItem.setItem(nowItem);

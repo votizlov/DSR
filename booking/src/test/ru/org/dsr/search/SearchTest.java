@@ -5,10 +5,8 @@ import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
-
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.*;
+import ru.org.dsr.search.AbstractSearch;
+import ru.org.dsr.search.SearchLabirintJSOUP;
 
 class SearchTest {
     AbstractSearch search;
@@ -16,7 +14,7 @@ class SearchTest {
     @Test
     void getDoc() {
         Document document = null;
-        search = new SearchLabirintJSOUP();
+        search = new SearchIviJSOUP();
         try {
             for (int i = 0; i < 300; i++) {
                 document = search.getDoc(search.cnf.SITE);

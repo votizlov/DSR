@@ -8,6 +8,7 @@ import ru.org.dsr.config.ConfigLabirint;
 import ru.org.dsr.domain.Comment;
 import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
+import ru.org.dsr.exception.LoadedEmptyBlocksException;
 import ru.org.dsr.exception.NoFoundElementsException;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
@@ -16,7 +17,7 @@ import ru.org.dsr.search.factory.TypeItem;
 import java.util.*;
 
 public class SearchLabirintJSOUP extends AbstractSearch {
-    private static final Logger log = Logger.getLogger(SearchLabirintJSOUP.class);
+    private static final Logger LOGGER = Logger.getLogger(SearchLabirintJSOUP.class);
     private String urlImg;
     private String urlMainBook;
 
@@ -31,6 +32,7 @@ public class SearchLabirintJSOUP extends AbstractSearch {
         books = getUrlBooks(url);
     }
 
+    //for test
     SearchLabirintJSOUP() {
         initConfig(cnf);
     }
@@ -48,7 +50,7 @@ public class SearchLabirintJSOUP extends AbstractSearch {
                 comments.add(temp.poll());
                 count--;
             }
-        for(;count > 0 && !books.isEmpty();) {
+        while(count > 0 && !books.isEmpty()) {
             temp = getComments(books.poll());
             int i;
             for (i = 0; i < count && !temp.isEmpty(); i++) {
@@ -65,48 +67,29 @@ public class SearchLabirintJSOUP extends AbstractSearch {
     }
 
     private Item initBook() throws RobotException, RequestException {
-        Document document = getDoc(urlMainBook);
-        String firstName = null, lastName = null, desc = null;
-        try {
-            lastName = getLastName(document);
-        } catch (NoFoundElementsException e) {
-            log.warn(e.toString());
-        }
-        try {
-            firstName = getFirstName(document);
-        } catch (NoFoundElementsException e) {
-            log.warn(e.toString());
-        }
-        try {
-            desc = getDesc(document);
-        } catch (NoFoundElementsException e) {
-            log.warn(e.toString());
-        }
-        return new Item(new ItemID(firstName, lastName, TypeItem.BOOK), desc, this.urlImg);
-    }
+        Item item = new Item();
+        Document doc = getDoc(urlMainBook);
 
-    private String getFirstName(Document document) throws NoFoundElementsException {
-        Elements elsFirstName = document.select(cnf.SELECT_ITEM_FIRST_NAME);
-        if (elsFirstName == null || elsFirstName.isEmpty()) {
-            throw new NoFoundElementsException(urlMainBook,cnf.SELECT_ITEM_FIRST_NAME);
+        try {
+            item.setDesc(getText(doc, cnf.SELECT_ITEM_DESC, urlMainBook));
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
-        return elsFirstName.get(0).text();
-    }
 
-    private String getLastName(Document document) throws NoFoundElementsException {
-        Elements elsLastName = document.select(cnf.SELECT_ITEM_LAST_NAME);
-        if (elsLastName == null || elsLastName.isEmpty()) {
-            throw new NoFoundElementsException(urlMainBook, cnf.SELECT_ITEM_LAST_NAME);
+        try {
+            item.setFirstName(getText(doc, cnf.SELECT_ITEM_FIRST_NAME, urlMainBook));
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
-        return elsLastName.get(0).text();
-    }
 
-    private String getDesc(Document document) throws NoFoundElementsException {
-        Elements elsDesc = document.select(cnf.SELECT_ITEM_DESC);
-        if (elsDesc == null || elsDesc.isEmpty()) {
-            throw new NoFoundElementsException(urlMainBook,cnf.SELECT_ITEM_DESC);
+        try {
+            item.setLastName(getText(doc, cnf.SELECT_ITEM_LAST_NAME, urlMainBook));
+        } catch (NoFoundElementsException | LoadedEmptyBlocksException e) {
+            LOGGER.warn(e);
         }
-        return elsDesc.get(0).text();
+        item.setType(TypeItem.BOOK);
+        item.setUrlImg(urlImg);
+        return item;
     }
 
     private Queue<Comment> getComments (String urlBook) throws RobotException, RequestException {
@@ -121,7 +104,7 @@ public class SearchLabirintJSOUP extends AbstractSearch {
         try {
             comments = initComments(elementsComment, urlBook);
         } catch (NoFoundElementsException e) {
-            log.warn(e.toString());
+            LOGGER.warn(e.toString());
         }
         return comments;
     }

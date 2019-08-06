@@ -44,8 +44,8 @@ class SearchKinopoiskJSOUPTest {
                 ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.MOVIE);
                 search = new SearchKinopoiskJSOUP(itemID);
                 List<Comment> comments = search.loadComments(1000);
-                int n;
-                Assert.assertTrue((100 == (n = comments.size()) || search.isEmpty()) && 100 >= n && n > 0);
+                int n = comments.size();
+                Assert.assertTrue((100 == n || search.isEmpty()) && 100 >= n);
             } catch (RequestException e) {
                 e.printStackTrace();
             }
@@ -64,7 +64,8 @@ class SearchKinopoiskJSOUPTest {
                 int n, part = 10;
                 for (int i = 0; i < part*10; i+=part) {
                     comments.addAll(search.loadComments(part));
-                    Assert.assertTrue((i+10 == (n = comments.size()) || search.isEmpty()) && n > 0);
+                    n = comments.size();
+                    Assert.assertTrue((i+10 == n || search.isEmpty()) && i+10>=n);
                 }
             } catch (RequestException e) {
                 e.printStackTrace();

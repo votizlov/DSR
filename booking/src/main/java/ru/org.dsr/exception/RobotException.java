@@ -1,17 +1,16 @@
 package ru.org.dsr.exception;
 
-
-import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 public class RobotException extends Exception {
 
-    private Document srcForRobot;
+    private Element srcForRobot;
 
-    public RobotException(Document srcForRobot) {
+    public RobotException(Element srcForRobot) {
         this.srcForRobot = srcForRobot;
     }
 
-    public RobotException(String message, Document srcForRobot) {
+    public RobotException(String message, Element srcForRobot) {
         super(message);
         this.srcForRobot = srcForRobot;
     }
@@ -20,7 +19,7 @@ public class RobotException extends Exception {
         super(message);
     }
 
-    public Document getSrcForRobot() {
+    public Element getSrcForRobot() {
         return srcForRobot;
     }
 

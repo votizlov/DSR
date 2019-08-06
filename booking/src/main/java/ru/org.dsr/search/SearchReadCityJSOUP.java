@@ -60,7 +60,7 @@ public class SearchReadCityJSOUP implements Search {
                 comments.add(temp.poll());
                 count--;
             }
-        for (;count>0 && !books.isEmpty(); ) {
+        while (count>0 && !books.isEmpty()) {
             temp = getComments(books.poll());
             for (int i = 0; i < count && !temp.isEmpty(); i++) {
                 comments.add(temp.poll());
@@ -72,7 +72,7 @@ public class SearchReadCityJSOUP implements Search {
 
     @Override
     public Item getItem() throws RobotException, RequestException {
-        return initBook(JSON_MAIN_BOOK);
+        return JSON_MAIN_BOOK == null ? null : initBook(JSON_MAIN_BOOK);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class SearchReadCityJSOUP implements Search {
     }
 
     private Item initBook(JSONObject JSONBook) throws RobotException, RequestException {
-        Item item = null;
+        Item item;
         String name, author, description;
         try {
             Document pageBook = getDocBook(JSON_MAIN_BOOK);
@@ -188,12 +188,10 @@ public class SearchReadCityJSOUP implements Search {
     private Document getDocBook(JSONObject JSONBook) throws RequestException, JSONImproperHandling, RobotException {
         String siteBook = null;
         try {
-
             String suffix = JSONBook.getJSONObject("_source").getString("main_url");
             siteBook = String.format("%s%s", SITE, suffix);
 
             return connect(siteBook, TypeResource.READ_CITY);
-
         } catch (JSONException e) {
             throw new JSONImproperHandling(JSONBook.toString(), "unknown param: _source || main_url");
         } catch (IOException e) {

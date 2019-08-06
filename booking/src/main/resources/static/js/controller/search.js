@@ -67,6 +67,11 @@ searchApp.controller("search_menu", function($scope, $http) {
                 return;
             }
         }, function (reason) {
+            $("#buttons").css("margin-top", "60px");
+            $("#description").html("").append(
+                "Непредвидимая ошибка сервиса, <br>" +
+                "просим у вас прощения.<br>"
+            );
             console.log(reason);
             clearTimeout(loadTime);
             $("#toResult").attr("value", "Найти");
@@ -79,7 +84,6 @@ searchApp.controller("search_menu", function($scope, $http) {
             }
             $scope.i++;
             $("#toResult").attr("value", "Загрузка"+suf);
-            console.log($scope.i);
         }, 1000);
     };
 });

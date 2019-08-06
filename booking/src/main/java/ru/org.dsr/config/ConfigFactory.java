@@ -5,7 +5,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 import ru.org.dsr.exception.PropertiesException;
 import ru.org.dsr.search.factory.TypeItem;
 import ru.org.dsr.search.factory.TypeResource;
@@ -17,10 +16,9 @@ import java.util.*;
 @ConfigurationProperties("factory")
 @Scope("singleton")
 public class ConfigFactory implements InitializingBean {
-    private ArrayList<TypeResource> resources = new ArrayList<>();
+    private LinkedList<TypeResource> resources = new LinkedList<>();
 
     private TypeResource mainMovie;
-    private TypeResource mainGame;
     private TypeResource mainBook;
 
     private HashMap<TypeItem, List<TypeResource>> data = new HashMap<>();
@@ -28,11 +26,11 @@ public class ConfigFactory implements InitializingBean {
     public ConfigFactory() {
     }
 
-    public ArrayList<TypeResource> getResources() {
+    public LinkedList<TypeResource> getResources() {
         return resources;
     }
 
-    public void setResources(ArrayList<TypeResource> resources) {
+    public void setResources(LinkedList<TypeResource> resources) {
         this.resources = resources;
     }
 
@@ -44,13 +42,6 @@ public class ConfigFactory implements InitializingBean {
         this.mainMovie = mainMovie;
     }
 
-    public TypeResource getMainGame() {
-        return mainGame;
-    }
-
-    public void setMainGame(TypeResource mainGame) {
-        this.mainGame = mainGame;
-    }
 
     public TypeResource getMainBook() {
         return mainBook;
@@ -73,7 +64,6 @@ public class ConfigFactory implements InitializingBean {
         return "ConfigFactory{" +
                 "resources=" + resources +
                 ", mainMovie='" + mainMovie + '\'' +
-                ", mainGame='" + mainGame + '\'' +
                 ", mainBook='" + mainBook + '\'' +
                 ", data=" + data +
                 '}';
@@ -83,10 +73,8 @@ public class ConfigFactory implements InitializingBean {
     public void afterPropertiesSet() throws PropertiesException {
         checkTypeItem(TypeItem.BOOK, mainBook);
         checkTypeItem(TypeItem.MOVIE, mainMovie);
-        checkTypeItem(TypeItem.GAME, mainGame);
         checkResources(mainBook, resources);
         checkResources(mainMovie, resources);
-        //checkResources(mainGame, resources);
 
         for (TypeResource c :
                 resources) {
@@ -104,6 +92,7 @@ public class ConfigFactory implements InitializingBean {
                     }
                     break;
                 case KINOPOISK:
+                case IVI:
                     if ((tmp = data.get(TypeItem.MOVIE)) != null) {
                         tmp.add(c);
                     } else {
@@ -118,7 +107,7 @@ public class ConfigFactory implements InitializingBean {
         resources = null;
     }
 
-    private static void checkResources(TypeResource type, List<TypeResource> resources) throws PropertiesException {
+    private static void checkResources(TypeResource type, LinkedList<TypeResource> resources) throws PropertiesException {
         boolean b = false;
         for (TypeResource c :
                 resources) {
@@ -127,7 +116,7 @@ public class ConfigFactory implements InitializingBean {
                 break;
             }
         }
-        if (!b) resources.add(type);
+        if (!b) resources.addFirst(type);
     }
 
     private static void checkTypeItem(TypeItem typeItem, TypeResource typeResource) throws PropertiesException {
@@ -141,18 +130,13 @@ public class ConfigFactory implements InitializingBean {
                     }
                     break;
                 case KINOPOISK:
+                case IVI:
                     if (typeItem != TypeItem.MOVIE) {
-                        throw new PropertiesException(String.format("Search %s cannot be main search of %s", typeResource, typeItem));
-                    }
-                    break;
-                case GAME:
-                    if (typeItem != TypeItem.GAME) {
                         throw new PropertiesException(String.format("Search %s cannot be main search of %s", typeResource, typeItem));
                     }
                     break;
             }
         } catch (NullPointerException e) {
-            System.out.println(123);
             throw new PropertiesException(String.format("Main search of %s is not found", typeItem));
         }
     }
