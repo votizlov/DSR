@@ -1,12 +1,11 @@
 package ru.org.dsr.domain;
 
 import ru.org.dsr.search.Search;
-import sun.awt.image.ImageWatched;
 
 import java.util.LinkedList;
 
 public class PackSearch {
-    private LinkedList<Search> searches = new LinkedList<>();
+    private LinkedList<Search> searches;
     private Search mainSearch;
 
     public PackSearch(LinkedList<Search> searches, Search mainSearch) {

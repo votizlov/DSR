@@ -1,41 +1,41 @@
 package ru.org.dsr.exception;
 
 public class LoadedEmptyBlocksException extends Exception {
-    private String attr;
+    private String select;
     private String url;
-    private String by;
+    private String attr;
 
-    public LoadedEmptyBlocksException(String attr, String url, String by) {
-        this.attr = attr;
+    public LoadedEmptyBlocksException(String select, String url, String attr) {
+        this.select = select;
         this.url = url;
-        this.by = by;
+        this.attr = attr;
     }
 
-    public LoadedEmptyBlocksException(String message, String attr, String url, String by) {
+    public LoadedEmptyBlocksException(String message, String select, String url, String attr) {
         super(message);
-        this.attr = attr;
+        this.select = select;
         this.url = url;
-        this.by = by;
+        this.attr = attr;
     }
 
-    public String getAttr() {
-        return attr;
+    public String getSelect() {
+        return select;
     }
 
     public String getUrl() {
         return url;
     }
 
-    public String getBy() {
-        return by;
+    public String getAttr() {
+        return attr;
     }
 
     @Override
     public String toString() {
         return "LoadedEmptyBlocksException{" +
-                "attr='" + attr + '\'' +
+                "select='" + select + '\'' +
                 ", url='" + url + '\'' +
-                ", by='" + by + '\'' +
+                ", attr='" + attr + '\'' +
                 '}';
     }
 }

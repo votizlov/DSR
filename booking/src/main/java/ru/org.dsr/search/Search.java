@@ -14,7 +14,6 @@ import java.util.List;
 public interface Search {
      String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; rv:40.0) Gecko/20100101 Firefox/40.0 Chrome/74.0.3729.169 Safari/537.36";
 
-
      Item getItem() throws RequestException, RobotException;
 
      List<Comment> loadComments(int count) throws RobotException, RequestException;
@@ -23,15 +22,35 @@ public interface Search {
 
      TypeResource getTypeResource();
 
-     default Document getDocument(String url) throws IOException, RobotException {
+     default Document connect(String url, TypeResource type) throws IOException, RobotException {
           Document doc = Jsoup.connect(url)
                   .userAgent(USER_AGENT)
                   .get();
 
-          String tmp;
-          if ((tmp = doc.select("body").text()) == null || tmp.isEmpty()
-                  || tmp.contains("много запросов"))
-               throw new RobotException(doc.toString());
+          switch (type) {
+              case LIVE_LIB: {
+                  if (doc.getElementsByClass("page-404").size() != 0)
+                      throw new RobotException(doc);
+                  break;
+              }
+              case READ_CITY: {
+                  String text = doc.select("body").text();
+                  if (text == null || text.isEmpty())
+                      throw new RobotException(doc);
+                  break;
+              }
+              case LABIRINT: {
+                  break;
+              }
+              case KINOPOISK: {
+                  if (doc.getElementsByClass("image form__captcha").size() != 0)
+                      throw new RobotException(doc);
+                  break;
+              }
+              case IVI: {
+
+              }
+          }
 
           return doc;
      }

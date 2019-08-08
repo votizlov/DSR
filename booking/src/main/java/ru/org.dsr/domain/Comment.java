@@ -3,19 +3,26 @@ package ru.org.dsr.domain;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "comments")
+@Table(name = "Comments")
 public class Comment {
 
     @Id
-    private int id;
-
-    @Column(name = "site")
+    @GeneratedValue
+    @Column(name = "Id")
+    private long id;
+    @Column(name = "Id_item")
+    private long idItem;
+    @Column(name = "Site")
     private String site;
-
+    @Column(name = "Page")
+    private int page;
+    @Column(name = "Author")
     private String author;
+    @Column(name = "Title")
     private String title;
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "Review", columnDefinition = "TEXT")
     private String desc;
+    @Column(name = "Date")
     private String date;
 
     public Comment(String site, String author, String title, String desc, String date) {
@@ -29,11 +36,11 @@ public class Comment {
     public Comment() {
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -75,5 +82,32 @@ public class Comment {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public long getIdItem() {
+        return idItem;
+    }
+
+    public void setIdItem(long idItem) {
+        this.idItem = idItem;
+    }
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
+    }
+
+    @Override
+    public String toString() {
+        return "Comment{" +
+                ", site='" + site + '\'' +
+                ", author='" + author + '\'' +
+                ", title='" + title + '\'' +
+                ", desc='" + desc + '\'' +
+                ", date='" + date + '\'' +
+                '}';
     }
 }

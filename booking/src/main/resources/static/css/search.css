@@ -35,9 +35,9 @@ body {
     height: 180px;
     min-width: 1024px;
     max-width: 1387px;
-    border-right: 5px #659ea2 dashed;
-    border-left: 5px #659ea2 dashed;
-    border-bottom: 7px #5d809c solid;
+    border-right: 5px #659ea2 solid;
+    border-left: 5px #659ea2 solid;
+    border-bottom: 7px #659ea2 solid;
 }
 
 .main {
@@ -46,8 +46,8 @@ body {
     height: 800px;
     min-width: 1024px;
     max-width: 1387px;
-    border-right: 5px #659ea2 dashed;
-    border-left: 5px #659ea2 dashed;
+    border-right: 5px #659ea2 solid;
+    border-left: 5px #659ea2 solid;
 }
 
 #menu {
@@ -89,12 +89,12 @@ body {
 }
 
 #description {
-    margin-top: 20px;
+    margin-top: 25px;
     text-align: center
 }
 
 #buttons {
-    margin-top: 80px;
+    margin-top: 60px;
     margin-left: 72px;
     margin-right: 72px;
 }
@@ -104,7 +104,7 @@ body {
     display: block;
     text-decoration: none;
     float: left;
-    width: 100px;
+    width: 150px;
     padding: 6px 0;
     text-align: center;
     font-size: 14px;

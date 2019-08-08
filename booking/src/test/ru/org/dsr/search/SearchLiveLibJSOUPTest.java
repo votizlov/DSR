@@ -7,11 +7,12 @@ import ru.org.dsr.domain.Item;
 import ru.org.dsr.domain.ItemID;
 import ru.org.dsr.exception.RequestException;
 import ru.org.dsr.exception.RobotException;
+import ru.org.dsr.search.SearchLiveLibJSOUP;
+import ru.org.dsr.search.factory.TypeItem;
 import ru.org.dsr.search.factory.TypeResource;
 
+import java.util.LinkedList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SearchLiveLibJSOUPTest {
     SearchLiveLibJSOUP search;
@@ -19,13 +20,13 @@ class SearchLiveLibJSOUPTest {
 
     @Test
     void getItem() {
-        itemID = new ItemID("Автостопом по Галактике", "", "MOVIE");
+        itemID = new ItemID("Автостопом по Галактике", "", TypeItem.BOOK);
         try {
             try {
                 search = new SearchLiveLibJSOUP(itemID);
                 Item item = search.getItem();
-                Assert.assertTrue(item != null &&
-                        item.getItemID()!=null &&
+                Assert.assertNotNull(item);
+                Assert.assertTrue(item.getItemID()!=null &&
                         item.getItemID().getFirstName() != null &&
                         item.getItemID().getLastName() != null &&
                         item.getDesc() != null &&
@@ -38,19 +39,41 @@ class SearchLiveLibJSOUPTest {
         }
     }
 
-    @Test
-    void loadComments() {
-        itemID = new ItemID("Автостопом по Галактике", "", "MOVIE");
+    @org.junit.jupiter.api.Test
+    void loadCommentsFull() {
         try {
             try {
+                ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.BOOK);
                 search = new SearchLiveLibJSOUP(itemID);
-                List<Comment> comments = search.loadComments(20);
-                Assert.assertTrue((100 == comments.size() || search.isEmpty()) && 100 >= comments.size());
+                List<Comment> comments = search.loadComments(100);
+                int n = comments.size();
+                Assert.assertTrue((100 == n || search.isEmpty()) && 100 >= n);
             } catch (RequestException e) {
                 e.printStackTrace();
             }
         } catch (RobotException e) {
-            return;
+            e.printStackTrace();
+        }
+    }
+
+    @org.junit.jupiter.api.Test
+    void loadCommentsParts() {
+        try {
+            try {
+                ItemID itemID = new ItemID("Автостопом по галактике", "", TypeItem.BOOK);
+                search = new SearchLiveLibJSOUP(itemID);
+                List<Comment> comments = new LinkedList<>();
+                int n, part = 10;
+                for (int i = 0; i < part*10; i+=part) {
+                    comments.addAll(search.loadComments(part));
+                    n = comments.size();
+                    Assert.assertTrue((i+10 == n || search.isEmpty()) && i+10 >= n);
+                }
+            } catch (RequestException e) {
+                e.printStackTrace();
+            }
+        } catch (RobotException e) {
+            e.printStackTrace();
         }
     }
 

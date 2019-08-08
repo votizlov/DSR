@@ -27,10 +27,11 @@ public class SearchReadCityJSOUP implements Search {
     private final String SITE = "https://www.chitai-gorod.ru";
     private final String SEARCH = "https://www.chitai-gorod.ru/search.php";
     private final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; rv:40.0) Gecko/20100101 Firefox/40.0 Chrome/74.0.3729.169 Safari/537.36";
-    private final int MAX_COUNT_BOOKS = 50;
+    private final int MAX_COUNT_BOOKS = 3;
     private final JSONObject JSON_MAIN_BOOK;
 
     private Queue<JSONObject> books;
+    private Queue<Comment> temp;
     private ItemID itemID;
 
 
@@ -47,38 +48,31 @@ public class SearchReadCityJSOUP implements Search {
         this.itemID = itemID;
     }
 
-    private SearchReadCityJSOUP() {
-        JSON_MAIN_BOOK = null;
-    }
-
-
     @Override
     public boolean isEmpty() {
-        return books == null || books.isEmpty();
-    }
+        return (books == null || books.isEmpty()) && (temp == null || temp.isEmpty());    }
 
     @Override
     public List<Comment> loadComments(int count) throws RobotException, RequestException {
         LinkedList<Comment> comments = new LinkedList<>();
-        LinkedList<Comment> currentComments = new LinkedList<>();
-        for (; ; ) {
-            if (books.isEmpty()) return comments;
-            List<Comment> gotComments = getComments(books.poll());
-            if (gotComments == null || gotComments.isEmpty()) continue;
-            currentComments.addAll(gotComments);
-            Iterator<Comment> it = currentComments.iterator();
-            for (int i = 0; i < count && it.hasNext(); i++) {
-                comments.add(it.next());
+        if (temp != null)
+            while (!temp.isEmpty() && count > 0) {
+                comments.add(temp.poll());
+                count--;
             }
-            if ((count -= currentComments.size()) < 0) break;
-            currentComments.clear();
+        while (count>0 && !books.isEmpty()) {
+            temp = getComments(books.poll());
+            for (int i = 0; i < count && !temp.isEmpty(); i++) {
+                comments.add(temp.poll());
+            }
+            count -= temp.size();
         }
         return comments;
     }
 
     @Override
     public Item getItem() throws RobotException, RequestException {
-        return initBook(JSON_MAIN_BOOK);
+        return JSON_MAIN_BOOK == null ? null : initBook(JSON_MAIN_BOOK);
     }
 
     @Override
@@ -87,7 +81,7 @@ public class SearchReadCityJSOUP implements Search {
     }
 
     private Item initBook(JSONObject JSONBook) throws RobotException, RequestException {
-        Item item = null;
+        Item item;
         String name, author, description;
         try {
             Document pageBook = getDocBook(JSON_MAIN_BOOK);
@@ -158,9 +152,8 @@ public class SearchReadCityJSOUP implements Search {
         }
     }
 
-    private List<Comment> getComments (JSONObject JSONBook) throws RobotException, RequestException {
-        if (books.isEmpty()) return null;
-        List<Comment> comments = new LinkedList<>();
+    private LinkedList<Comment> getComments (JSONObject JSONBook) throws RobotException, RequestException {
+        LinkedList<Comment> comments = new LinkedList<>();
         Document docBook;
         try {
             docBook = getDocBook(JSONBook);
@@ -195,12 +188,10 @@ public class SearchReadCityJSOUP implements Search {
     private Document getDocBook(JSONObject JSONBook) throws RequestException, JSONImproperHandling, RobotException {
         String siteBook = null;
         try {
-
             String suffix = JSONBook.getJSONObject("_source").getString("main_url");
             siteBook = String.format("%s%s", SITE, suffix);
 
-            return getDocument(siteBook);
-
+            return connect(siteBook, TypeResource.READ_CITY);
         } catch (JSONException e) {
             throw new JSONImproperHandling(JSONBook.toString(), "unknown param: _source || main_url");
         } catch (IOException e) {

@@ -1,18 +1,25 @@
 package ru.org.dsr.exception;
 
 public class PropertiesException extends Exception {
-    private String need;
+    private String message;
 
-    public PropertiesException(String need) {
-        this.need = need;
+    public PropertiesException(String message) {
+        this.message = message;
     }
 
     public PropertiesException(String message, String need) {
         super(message);
-        this.need = need;
+        this.message = need;
     }
 
-    public String getNeed() {
-        return need;
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public String toString() {
+        return "PropertiesException{" +
+                "message='" + message + '\'' +
+                '}';
     }
 }

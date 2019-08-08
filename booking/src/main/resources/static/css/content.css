@@ -26,7 +26,6 @@ body {
 }
 
 .content {
-    overflow:hidden;
     background: #380b9c;
 }
 
@@ -36,7 +35,9 @@ body {
     height: 165px;
     min-width: 924px;
     max-width: 1287px;
-    border: 5px #39caca dotted;
+    border-left: 7px #a4acb3 ridge;
+    border-right: 7px #a4acb3 ridge;
+    border-bottom: 7px #a4acb3 ridge
 }
 
 .block_title {
@@ -58,14 +59,13 @@ body {
 }
 
 .column_item {
-    overflow: hidden;
     min-height: 500px;
     min-width: 924px;
     max-width: 1287px;
     height: 100%;
     width: 100%;
     background-color: #435ea8;
-    border: 5px #39caca dotted;
+    border: 7px #a4acb3 ridge
 }
 
 .block_img {
@@ -99,6 +99,11 @@ body {
 .numbersPage {
     width: 30px;
     height: 30px;
+}
+
+.block_item, .block_title, .block_comments {
+    border-left: 7px #85c6ff solid;
+    border-right: 7px #85c6ff solid;
 }
 
 .pagesButtons {
@@ -152,6 +157,8 @@ body {
 }
 
 #desc_item {
+    padding-left: 10px;
+    padding-right: 10px;
     margin-top: 480px;
     margin-left: 10px;
     margin-right: 10px;
@@ -166,10 +173,20 @@ body {
 
 .comment {
     font-size: 25px;
-    margin-left: 40px;
+    margin-left: 30px;
+    margin-right: 30px;
 }
 
 #back {
 
+}
+
+a.view {
+    outline: none;
+    display: block;
+    text-decoration: none;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
 }
 

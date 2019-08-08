@@ -4,10 +4,23 @@
 <head>
     <title>DSR Practice task</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <link href="css/result.css" rel="stylesheet"/>
+    <link href="css/content.css" rel="stylesheet"/>
     <script src="js/lib/angular.js"></script>
     <script src="js/lib/jquery-3.4.1.js"></script>
-    <script src="js/controller/result.js"></script>
+    <script src="js/controller/content.js"></script>
+    <script type="text/javascript">
+        function openComment(id) {
+            $('#preview-comment_number_' + id).css("display", "none");
+            $('#full-comment_number_' + id).css("display", "block");
+            return false;
+        }
+
+        function hideComment(id) {
+            $('#preview-comment_number_' + id).css("display", "block");
+            $('#full-comment_number_' + id).css("display", "none");
+            return false;
+        }
+    </script>
 </head>
 <body>
 <div class="page">
@@ -21,8 +34,8 @@
                     </p>
                 </div>
                 <div id="user_menu" ng-controller="back">
-                    User menu uuu
-                    <input id="back" type="submit" ng-click="toBack()" value="Выйти"/>
+                    <br>
+                    <div align="center"><a href="search">Назад </a></div>
                 </div>
             </div>
         </div>
@@ -61,34 +74,4 @@
     </div>
 </div>
 </body>
-<!--<body>-->
-<!--<div id="title" ng-controller="stageBook">-->
-<!--<div id="description" ng-init="initBook()">-->
-<!--<p>-->
-<!--Название книги : {{lastName}} <br>-->
-<!--Имя автора : {{firstName}} <br>-->
-
-<!--</p>-->
-<!--</div>-->
-<!--<div id="controller">-->
-<!--<form id="back" action="#" th:action="@{/resultExit}" method="post">-->
-<!--<input type="submit" value="Back"/>-->
-<!--</form>-->
-<!--</div>-->
-<!--</div>-->
-<!--<div id="content" ng-controller="comments">-->
-<!--<div id="comments">-->
-<!--<div id="comment">-->
-<!--<p>-->
-
-<!--</p>-->
-<!--<br>-->
-<!--<br>-->
-<!--<hr color='#bfa68e'/><br>-->
-<!--</div>-->
-
-<!--</div>-->
-<!--<button ng-click="pushComments(10)">Еще</button>-->
-<!--</div>-->
-<!--</body>-->
 </html>
